@@ -3,7 +3,7 @@
 ## Repositorio
 
 - **GitHub:** https://github.com/SilvestreNovaro/ecommerce
-- **Deploy:** Vercel (pendiente de conectar)
+- **Deploy:** https://nalika-9plpehw8t-silvestrenovaros-projects.vercel.app
 
 ---
 
