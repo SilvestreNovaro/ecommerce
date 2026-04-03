@@ -76,6 +76,13 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Send confirmation email (fire and forget)
+    fetch("/api/emails/order-confirmation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId: order.id }),
+    }).catch(() => {});
+
     clearCart();
     router.push(`/checkout/confirmacion?order=${order.id}`);
   }
