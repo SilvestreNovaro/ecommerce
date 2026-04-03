@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { ImageUpload } from "./image-upload";
 import type { Product } from "@/types";
 
 type Props = {
@@ -8,9 +10,12 @@ type Props = {
 };
 
 export function ProductForm({ product, action }: Props) {
+  const [imageUrl, setImageUrl] = useState(product?.image_url ?? "");
+
   return (
     <form action={action} className="max-w-xl space-y-4">
       {product && <input type="hidden" name="id" value={product.id} />}
+      <input type="hidden" name="image_url" value={imageUrl} />
 
       <div>
         <label htmlFor="name" className="block text-sm font-medium">
@@ -70,19 +75,7 @@ export function ProductForm({ product, action }: Props) {
         </div>
       </div>
 
-      <div>
-        <label htmlFor="image_url" className="block text-sm font-medium">
-          URL de imagen
-        </label>
-        <input
-          id="image_url"
-          name="image_url"
-          type="url"
-          defaultValue={product?.image_url ?? ""}
-          placeholder="https://..."
-          className="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-        />
-      </div>
+      <ImageUpload currentUrl={product?.image_url} onUpload={setImageUrl} />
 
       <div className="flex items-center gap-2">
         <input
