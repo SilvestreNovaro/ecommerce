@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CartBadge } from "./cart-badge";
+import { SearchBar } from "./search-bar";
 import { MobileMenu } from "./mobile-menu";
 
 export async function Header() {
@@ -21,6 +22,7 @@ export async function Header() {
           <Link href="/productos" className="text-sm hover:underline">
             Productos
           </Link>
+          <SearchBar />
           <CartBadge />
           {user ? (
             <>
@@ -44,7 +46,8 @@ export async function Header() {
         </div>
 
         {/* Mobile nav */}
-        <div className="md:hidden">
+        <div className="flex items-center gap-1 md:hidden">
+          <SearchBar />
           <MobileMenu isLoggedIn={!!user} />
         </div>
       </nav>
