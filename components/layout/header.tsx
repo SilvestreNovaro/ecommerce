@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { CartBadge } from "./cart-badge";
 
 export async function Header() {
   const supabase = await createClient();
@@ -17,9 +18,7 @@ export async function Header() {
           <Link href="/productos" className="text-sm hover:underline">
             Productos
           </Link>
-          <Link href="/carrito" className="text-sm hover:underline">
-            Carrito
-          </Link>
+          <CartBadge />
           {user ? (
             <>
               <Link href="/cuenta" className="text-sm hover:underline">

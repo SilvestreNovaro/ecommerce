@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useCart } from "@/lib/cart-context";
 import type { Product } from "@/types";
 
 export function AddToCartButton({ product }: { product: Product }) {
+  const { addItem } = useCart();
   const [added, setAdded] = useState(false);
 
   function handleAdd() {
-    // TODO: integrar con estado global del carrito (prioridad 4)
+    addItem(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }
