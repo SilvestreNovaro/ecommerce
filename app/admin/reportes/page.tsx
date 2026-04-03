@@ -199,28 +199,39 @@ export default async function ReportesPage({ searchParams }: Props) {
         {/* Daily trend chart (simple bar) */}
         <div className="rounded-lg border bg-white p-4">
           <h3 className="font-bold">Tendencia de ventas</h3>
-          {dailyTrend.length === 0 ? (
-            <p className="mt-3 text-sm text-gray-500">Sin datos.</p>
+          <p className="text-xs text-gray-400 mt-1">Fecha | Barra de ingresos | Monto | Órdenes</p>
+          {dailyTrend.filter((d) => d.revenue > 0).length === 0 ? (
+            <p className="mt-3 text-sm text-gray-500">Sin ventas en este período.</p>
           ) : (
-            <div className="mt-4 space-y-1">
+            <div className="mt-4 space-y-2">
               {dailyTrend.map((day) => (
-                <div key={day.date} className="flex items-center gap-2 text-xs">
-                  <span className="w-10 shrink-0 text-gray-500">
+                <div key={day.date} className={`flex items-center gap-2 text-xs ${day.revenue === 0 ? "opacity-30" : ""}`}>
+                  <span className="w-12 shrink-0 text-gray-500">
                     {formatDate(day.date)}
                   </span>
-                  <div className="flex-1 h-5 bg-gray-100 rounded overflow-hidden">
-                    <div
-                      className="h-full bg-black rounded"
-                      style={{
-                        width: `${(day.revenue / maxDailyRevenue) * 100}%`,
-                      }}
-                    />
+                  <div className="flex-1 h-7 bg-gray-100 rounded overflow-hidden">
+                    {day.revenue > 0 && (
+                      <div
+                        className="h-full bg-black rounded flex items-center justify-end pr-2"
+                        style={{
+                          width: `${Math.max((day.revenue / maxDailyRevenue) * 100, 8)}%`,
+                        }}
+                      >
+                        {(day.revenue / maxDailyRevenue) > 0.3 && (
+                          <span className="text-white text-[10px] font-medium">
+                            {formatPrice(day.revenue)}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <span className="w-20 shrink-0 text-right font-medium">
-                    {formatPrice(day.revenue)}
-                  </span>
-                  <span className="w-8 shrink-0 text-right text-gray-400">
-                    {day.orders}
+                  {(day.revenue / maxDailyRevenue) <= 0.3 && day.revenue > 0 && (
+                    <span className="w-20 shrink-0 text-right font-medium">
+                      {formatPrice(day.revenue)}
+                    </span>
+                  )}
+                  <span className="w-6 shrink-0 text-right text-gray-400">
+                    {day.orders > 0 ? day.orders : ""}
                   </span>
                 </div>
               ))}
