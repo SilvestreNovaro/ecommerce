@@ -20,8 +20,8 @@ export function ReportPeriodSelector({ current }: { current: string }) {
           onClick={() => router.push(`/admin/reportes?period=${p.value}`)}
           className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
             current === p.value
-              ? "bg-black text-white"
-              : "border hover:bg-gray-50"
+              ? "bg-violet-600 text-white"
+              : "border hover:bg-violet-50"
           }`}
         >
           {p.label}

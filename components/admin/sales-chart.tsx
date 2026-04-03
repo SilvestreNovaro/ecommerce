@@ -76,8 +76,8 @@ export function SalesChart({
         <AreaChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#000000" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#000000" stopOpacity={0} />
+              <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.2} />
+              <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="colorPrev" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#9CA3AF" stopOpacity={0.1} />
@@ -113,11 +113,11 @@ export function SalesChart({
           <Area
             type="monotone"
             dataKey="revenue"
-            stroke="#000000"
+            stroke="#8B5CF6"
             strokeWidth={2}
             fill="url(#colorRevenue)"
             dot={false}
-            activeDot={{ r: 4, fill: "#000", strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: "#8B5CF6", strokeWidth: 0 }}
           />
         </AreaChart>
       </ResponsiveContainer>

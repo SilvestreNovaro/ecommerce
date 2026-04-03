@@ -16,13 +16,13 @@ type CategoryData = {
 };
 
 const COLORS = [
-  "#000000",
-  "#374151",
-  "#6B7280",
-  "#9CA3AF",
-  "#D1D5DB",
-  "#E5E7EB",
-  "#F3F4F6",
+  "#8B5CF6",
+  "#A78BFA",
+  "#C4B5FD",
+  "#7C3AED",
+  "#6D28D9",
+  "#DDD6FE",
+  "#EDE9FE",
 ];
 
 function formatCurrency(value: number) {

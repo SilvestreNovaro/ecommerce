@@ -289,7 +289,7 @@ export default async function ReportesPage({ searchParams }: Props) {
           <h3 className="font-bold">Tendencia de ventas</h3>
           <div className="flex items-center gap-4 text-xs text-gray-500">
             <div className="flex items-center gap-1.5">
-              <div className="h-0.5 w-4 bg-black rounded" />
+              <div className="h-0.5 w-4 bg-violet-500 rounded" />
               <span>Actual</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -362,7 +362,7 @@ export default async function ReportesPage({ searchParams }: Props) {
                     </div>
                     <div className="h-1.5 bg-gray-100 rounded overflow-hidden">
                       <div
-                        className="h-full bg-black rounded"
+                        className="h-full bg-violet-500 rounded"
                         style={{ width: `${Math.max(pct, 2)}%` }}
                       />
                     </div>
