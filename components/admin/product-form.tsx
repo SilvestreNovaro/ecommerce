@@ -64,10 +64,24 @@ export function ProductForm({ product, categories, action }: Props) {
         </select>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div>
+        <label htmlFor="sku" className="block text-sm font-medium">
+          SKU
+        </label>
+        <input
+          id="sku"
+          name="sku"
+          type="text"
+          defaultValue={product?.sku ?? ""}
+          placeholder="Ej: PROD-001"
+          className="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+        />
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <label htmlFor="price" className="block text-sm font-medium">
-            Precio
+            Precio venta
           </label>
           <input
             id="price"
@@ -90,6 +104,19 @@ export function ProductForm({ product, categories, action }: Props) {
             min="0"
             defaultValue={product?.stock ?? 0}
             required
+            className="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+          />
+        </div>
+        <div>
+          <label htmlFor="cost_price" className="block text-sm font-medium">
+            Costo
+          </label>
+          <input
+            id="cost_price"
+            name="cost_price"
+            type="number"
+            min="0"
+            defaultValue={product?.cost_price ?? 0}
             className="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
