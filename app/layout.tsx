@@ -16,8 +16,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tienda Online",
-  description: "Tu tienda de confianza",
+  title: {
+    default: "Tienda Online",
+    template: "%s | Tienda Online",
+  },
+  description:
+    "Descubre los mejores productos al mejor precio en nuestra tienda online.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+  ),
+  openGraph: {
+    title: "Tienda Online",
+    description:
+      "Descubre los mejores productos al mejor precio en nuestra tienda online.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -30,10 +43,10 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-gray-50">
         <CartProvider>
           <Header />
-          <div className="flex-1">{children}</div>
+          <main className="flex-1">{children}</main>
           <Footer />
         </CartProvider>
       </body>

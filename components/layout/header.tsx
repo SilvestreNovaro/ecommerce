@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CartBadge } from "./cart-badge";
+import { MobileMenu } from "./mobile-menu";
 
 export async function Header() {
   const supabase = await createClient();
@@ -9,12 +10,14 @@ export async function Header() {
   } = await supabase.auth.getUser();
 
   return (
-    <header className="border-b bg-white">
+    <header className="sticky top-0 z-50 border-b bg-white">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <Link href="/" className="text-xl font-bold">
           Tienda
         </Link>
-        <div className="flex items-center gap-6">
+
+        {/* Desktop nav */}
+        <div className="hidden items-center gap-6 md:flex">
           <Link href="/productos" className="text-sm hover:underline">
             Productos
           </Link>
@@ -38,6 +41,11 @@ export async function Header() {
               Ingresar
             </Link>
           )}
+        </div>
+
+        {/* Mobile nav */}
+        <div className="md:hidden">
+          <MobileMenu isLoggedIn={!!user} />
         </div>
       </nav>
     </header>

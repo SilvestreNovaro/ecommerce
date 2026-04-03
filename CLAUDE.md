@@ -167,10 +167,10 @@ npm run lint
 ## Prioridades de desarrollo
 
 1. ~~Setup inicial: repo, Supabase proyecto, Vercel deploy base~~ ✅
-2. Auth completo (login, registro, middleware de protección)
-3. Catálogo de productos (listado + detalle)
-4. Carrito de compras (estado cliente)
-5. Checkout + creación de orden en Supabase
-6. Emails transaccionales con Resend
-7. Panel admin básico (ABM productos, vista de órdenes)
-8. Polish: SEO, performance, accesibilidad, responsiveness fino
+2. ~~Auth completo (login, registro, middleware de protección)~~ ✅
+3. ~~Catálogo de productos (listado + detalle)~~ ✅
+4. ~~Carrito de compras (estado cliente)~~ ✅
+5. ~~Checkout + creación de orden en Supabase~~ ✅
+6. ~~Emails transaccionales con Resend~~ ✅
+7. ~~Panel admin básico (ABM productos, vista de órdenes)~~ ✅
+8. ~~Polish: SEO, performance, accesibilidad, responsiveness fino~~ ✅

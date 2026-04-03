@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/shop/product-card";
 import type { Product } from "@/types";
+
+export const metadata: Metadata = {
+  title: "Productos",
+  description: "Explorá nuestro catálogo completo de productos.",
+};
 
 export default async function ProductosPage() {
   const supabase = await createClient();

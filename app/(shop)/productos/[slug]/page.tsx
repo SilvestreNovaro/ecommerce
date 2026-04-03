@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
@@ -8,6 +9,28 @@ import type { Product } from "@/types";
 type Props = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("products")
+    .select("name, description, image_url")
+    .eq("slug", slug)
+    .single();
+
+  if (!data) return { title: "Producto no encontrado" };
+
+  return {
+    title: data.name,
+    description: data.description || `Comprá ${data.name} en nuestra tienda.`,
+    openGraph: {
+      title: data.name,
+      description: data.description || `Comprá ${data.name} en nuestra tienda.`,
+      images: data.image_url ? [data.image_url] : [],
+    },
+  };
+}
 
 export default async function ProductoDetallePage({ params }: Props) {
   const { slug } = await params;
