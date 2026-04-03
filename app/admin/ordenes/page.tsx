@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils";
 import { OrderStatusSelect } from "@/components/admin/order-status-select";
@@ -43,6 +44,7 @@ export default async function AdminOrdenesPage() {
                 <th className="pb-3 font-medium">Total</th>
                 <th className="pb-3 font-medium">Estado</th>
                 <th className="pb-3 font-medium">Fecha</th>
+                <th className="pb-3 font-medium"></th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -68,6 +70,14 @@ export default async function AdminOrdenesPage() {
                   </td>
                   <td className="py-3 text-gray-500">
                     {new Date(order.created_at).toLocaleDateString("es-AR")}
+                  </td>
+                  <td className="py-3">
+                    <Link
+                      href={`/admin/ordenes/${order.id}`}
+                      className="text-sm underline"
+                    >
+                      Ver
+                    </Link>
                   </td>
                 </tr>
               ))}

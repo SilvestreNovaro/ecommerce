@@ -23,6 +23,7 @@ export async function createProduct(formData: FormData) {
     price: Number(formData.get("price")),
     stock: Number(formData.get("stock")),
     image_url: (formData.get("image_url") as string) || null,
+    category_id: (formData.get("category_id") as string) || null,
     active: formData.get("active") === "on",
   });
 
@@ -45,6 +46,7 @@ export async function updateProduct(formData: FormData) {
       price: Number(formData.get("price")),
       stock: Number(formData.get("stock")),
       image_url: (formData.get("image_url") as string) || null,
+      category_id: (formData.get("category_id") as string) || null,
       active: formData.get("active") === "on",
       updated_at: new Date().toISOString(),
     })

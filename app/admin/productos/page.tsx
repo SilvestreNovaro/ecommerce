@@ -2,17 +2,40 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
-import type { Product } from "@/types";
+import { ProductFilters } from "@/components/admin/product-filters";
+import type { Product, Category } from "@/types";
 
-export default async function AdminProductosPage() {
+type Props = {
+  searchParams: Promise<{ q?: string; category?: string }>;
+};
+
+type ProductWithCategory = Product & {
+  categories: { name: string } | null;
+};
+
+export default async function AdminProductosPage({ searchParams }: Props) {
+  const { q, category } = await searchParams;
   const supabase = await createClient();
 
-  const { data } = await supabase
+  let query = supabase
     .from("products")
-    .select("*")
+    .select("*, categories(name)")
     .order("created_at", { ascending: false });
 
-  const products = (data ?? []) as Product[];
+  if (q) {
+    query = query.ilike("name", `%${q}%`);
+  }
+  if (category) {
+    query = query.eq("category_id", category);
+  }
+
+  const [{ data }, { data: categoriesData }] = await Promise.all([
+    query,
+    supabase.from("categories").select("*").order("name"),
+  ]);
+
+  const products = (data ?? []) as ProductWithCategory[];
+  const categories = (categoriesData ?? []) as Category[];
 
   return (
     <div>
@@ -26,14 +49,21 @@ export default async function AdminProductosPage() {
         </Link>
       </div>
 
+      <div className="mt-4">
+        <ProductFilters categories={categories} currentQ={q} currentCategory={category} />
+      </div>
+
       {products.length === 0 ? (
-        <p className="mt-8 text-gray-500">No hay productos todavía.</p>
+        <p className="mt-8 text-gray-500">
+          {q || category ? "No se encontraron productos con esos filtros." : "No hay productos todavía."}
+        </p>
       ) : (
-        <div className="mt-6 overflow-x-auto">
+        <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b text-gray-500">
               <tr>
                 <th className="pb-3 font-medium">Nombre</th>
+                <th className="pb-3 font-medium">Categoría</th>
                 <th className="pb-3 font-medium">Precio</th>
                 <th className="pb-3 font-medium">Stock</th>
                 <th className="pb-3 font-medium">Estado</th>
@@ -44,6 +74,9 @@ export default async function AdminProductosPage() {
               {products.map((product) => (
                 <tr key={product.id}>
                   <td className="py-3 font-medium">{product.name}</td>
+                  <td className="py-3 text-gray-500">
+                    {product.categories?.name ?? "—"}
+                  </td>
                   <td className="py-3">{formatPrice(product.price)}</td>
                   <td className="py-3">{product.stock}</td>
                   <td className="py-3">

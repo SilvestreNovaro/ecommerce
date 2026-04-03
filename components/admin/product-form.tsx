@@ -2,14 +2,15 @@
 
 import { useState } from "react";
 import { ImageUpload } from "./image-upload";
-import type { Product } from "@/types";
+import type { Product, Category } from "@/types";
 
 type Props = {
   product?: Product;
+  categories: Category[];
   action: (formData: FormData) => Promise<void>;
 };
 
-export function ProductForm({ product, action }: Props) {
+export function ProductForm({ product, categories, action }: Props) {
   const [imageUrl, setImageUrl] = useState(product?.image_url ?? "");
 
   return (
@@ -42,6 +43,25 @@ export function ProductForm({ product, action }: Props) {
           defaultValue={product?.description}
           className="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
         />
+      </div>
+
+      <div>
+        <label htmlFor="category_id" className="block text-sm font-medium">
+          Categoría
+        </label>
+        <select
+          id="category_id"
+          name="category_id"
+          defaultValue={product?.category_id ?? ""}
+          className="mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+        >
+          <option value="">Sin categoría</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

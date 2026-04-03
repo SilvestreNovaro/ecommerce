@@ -37,6 +37,9 @@ export default async function AdminLayout({
           <Link href="/admin/ordenes" className="hover:underline">
             Órdenes
           </Link>
+          <Link href="/admin/categorias" className="hover:underline">
+            Categorías
+          </Link>
         </nav>
       </div>
       <div className="mt-8">{children}</div>
