@@ -110,21 +110,14 @@ export default async function ReportesPage({ searchParams }: Props) {
     .sort((a, b) => b.units - a.units)
     .slice(0, 10);
 
-  // Daily sales trend (last N days)
+  // Daily sales trend — only days with sales
   const dailyMap = new Map<string, { revenue: number; orders: number }>();
-  for (let i = 0; i < Math.min(days, 30); i++) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    dailyMap.set(key, { revenue: 0, orders: 0 });
-  }
   for (const order of currentOrders ?? []) {
     const key = order.created_at.slice(0, 10);
-    const existing = dailyMap.get(key);
-    if (existing) {
-      existing.revenue += order.total;
-      existing.orders += 1;
-    }
+    const existing = dailyMap.get(key) ?? { revenue: 0, orders: 0 };
+    existing.revenue += order.total;
+    existing.orders += 1;
+    dailyMap.set(key, existing);
   }
   const dailyTrend = [...dailyMap.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
@@ -199,40 +192,32 @@ export default async function ReportesPage({ searchParams }: Props) {
         {/* Daily trend chart (simple bar) */}
         <div className="rounded-lg border bg-white p-4">
           <h3 className="font-bold">Tendencia de ventas</h3>
-          <p className="text-xs text-gray-400 mt-1">Fecha | Barra de ingresos | Monto | Órdenes</p>
-          {dailyTrend.filter((d) => d.revenue > 0).length === 0 ? (
+          {dailyTrend.length === 0 ? (
             <p className="mt-3 text-sm text-gray-500">Sin ventas en este período.</p>
           ) : (
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-3">
               {dailyTrend.map((day) => (
-                <div key={day.date} className={`flex items-center gap-2 text-xs ${day.revenue === 0 ? "opacity-30" : ""}`}>
-                  <span className="w-12 shrink-0 text-gray-500">
-                    {formatDate(day.date)}
-                  </span>
-                  <div className="flex-1 h-7 bg-gray-100 rounded overflow-hidden">
-                    {day.revenue > 0 && (
-                      <div
-                        className="h-full bg-black rounded flex items-center justify-end pr-2"
-                        style={{
-                          width: `${Math.max((day.revenue / maxDailyRevenue) * 100, 8)}%`,
-                        }}
-                      >
-                        {(day.revenue / maxDailyRevenue) > 0.3 && (
-                          <span className="text-white text-[10px] font-medium">
-                            {formatPrice(day.revenue)}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  {(day.revenue / maxDailyRevenue) <= 0.3 && day.revenue > 0 && (
-                    <span className="w-20 shrink-0 text-right font-medium">
-                      {formatPrice(day.revenue)}
+                <div key={day.date}>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-gray-500">
+                      {new Date(day.date).toLocaleDateString("es-AR", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                      })}
                     </span>
-                  )}
-                  <span className="w-6 shrink-0 text-right text-gray-400">
-                    {day.orders > 0 ? day.orders : ""}
-                  </span>
+                    <span className="font-medium">
+                      {formatPrice(day.revenue)} — {day.orders} {day.orders === 1 ? "orden" : "órdenes"}
+                    </span>
+                  </div>
+                  <div className="h-6 bg-gray-100 rounded overflow-hidden">
+                    <div
+                      className="h-full bg-black rounded"
+                      style={{
+                        width: `${Math.max((day.revenue / maxDailyRevenue) * 100, 5)}%`,
+                      }}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
