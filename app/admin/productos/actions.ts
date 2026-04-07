@@ -69,20 +69,24 @@ export async function getProductOrderCount(productId: string) {
   return count ?? 0;
 }
 
-export async function deleteProduct(productId: string, forceDelete = false) {
+export async function deleteProduct(productId: string) {
   const supabase = await createClient();
-
-  if (forceDelete) {
-    // Delete order items referencing this product first
-    await supabase
-      .from("order_items")
-      .delete()
-      .eq("product_id", productId);
-  }
 
   const { error } = await supabase
     .from("products")
     .delete()
+    .eq("id", productId);
+
+  if (error) throw new Error(error.message);
+  redirect("/admin/productos");
+}
+
+export async function deactivateProduct(productId: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("products")
+    .update({ active: false, updated_at: new Date().toISOString() })
     .eq("id", productId);
 
   if (error) throw new Error(error.message);

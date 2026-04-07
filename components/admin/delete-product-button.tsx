@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   deleteProduct,
+  deactivateProduct,
   getProductOrderCount,
 } from "@/app/admin/productos/actions";
 
@@ -26,15 +27,9 @@ export function DeleteProductButton({ productId }: { productId: string }) {
     }
   }
 
-  async function handleForceDelete() {
-    if (
-      !confirm(
-        "Esto eliminará el producto y sus registros de ventas. ¿Estás seguro?"
-      )
-    )
-      return;
+  async function handleDeactivate() {
     setLoading(true);
-    await deleteProduct(productId, true);
+    await deactivateProduct(productId);
     setOpen(false);
     setLoading(false);
   }
@@ -56,18 +51,19 @@ export function DeleteProductButton({ productId }: { productId: string }) {
             <p className="text-sm text-gray-600">
               Este producto aparece en{" "}
               <span className="font-bold">{orderCount}</span>{" "}
-              {orderCount === 1 ? "orden" : "órdenes"} de compra.
+              {orderCount === 1 ? "orden" : "órdenes"} de compra. No se puede
+              eliminar porque se perdería el historial de ventas.
             </p>
 
             <div className="space-y-3">
               <button
-                onClick={handleForceDelete}
+                onClick={handleDeactivate}
                 disabled={loading}
-                className="w-full rounded-md bg-red-600 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                className="w-full rounded-md bg-black py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
               >
-                Eliminar producto y registros de ventas
-                <span className="block text-xs text-red-200 font-normal mt-0.5">
-                  Las órdenes perderán el detalle de este producto
+                Desactivar producto
+                <span className="block text-xs text-gray-300 font-normal mt-0.5">
+                  Se oculta de la tienda pero se conserva el historial
                 </span>
               </button>
 
