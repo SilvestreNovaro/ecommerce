@@ -36,7 +36,7 @@ export default async function HomePage() {
             Categorías
           </h2>
           <div className="mt-4 flex flex-wrap justify-center gap-3">
-            {categories.map((cat) => (
+            {categories.filter((c) => !c.parent_id).map((cat) => (
               <Link
                 key={cat.id}
                 href={`/productos?category=${cat.slug}`}

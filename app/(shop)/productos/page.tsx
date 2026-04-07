@@ -34,7 +34,15 @@ export default async function ProductosPage({ searchParams }: Props) {
   if (category) {
     const cat = categories.find((c) => c.slug === category);
     if (cat) {
-      query = query.eq("category_id", cat.id);
+      // If it's a parent category, include all its subcategories
+      const childIds = categories
+        .filter((c) => c.parent_id === cat.id)
+        .map((c) => c.id);
+      if (childIds.length > 0) {
+        query = query.in("category_id", [cat.id, ...childIds]);
+      } else {
+        query = query.eq("category_id", cat.id);
+      }
     }
   }
 

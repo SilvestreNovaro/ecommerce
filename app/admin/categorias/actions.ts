@@ -16,10 +16,12 @@ function slugify(text: string) {
 export async function createCategory(formData: FormData) {
   const supabase = await createClient();
   const name = formData.get("name") as string;
+  const parentId = (formData.get("parent_id") as string) || null;
 
   const { error } = await supabase.from("categories").insert({
     name,
     slug: slugify(name),
+    parent_id: parentId,
   });
 
   if (error) throw new Error(error.message);

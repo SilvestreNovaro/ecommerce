@@ -68,34 +68,78 @@ export function ProductFilters({
       </form>
 
       {/* Categories */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => navigate({ category: undefined })}
-          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-            !currentCategory
-              ? "bg-black text-white"
-              : "border hover:bg-gray-50"
-          }`}
-        >
-          Todos
-        </button>
-        {categories.map((cat) => (
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
           <button
-            key={cat.id}
-            onClick={() =>
-              navigate({
-                category: currentCategory === cat.slug ? undefined : cat.slug,
-              })
-            }
+            onClick={() => navigate({ category: undefined })}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              currentCategory === cat.slug
+              !currentCategory
                 ? "bg-black text-white"
                 : "border hover:bg-gray-50"
             }`}
           >
-            {cat.name}
+            Todos
           </button>
-        ))}
+          {categories
+            .filter((c) => !c.parent_id)
+            .map((parent) => (
+              <button
+                key={parent.id}
+                onClick={() =>
+                  navigate({
+                    category:
+                      currentCategory === parent.slug
+                        ? undefined
+                        : parent.slug,
+                  })
+                }
+                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  currentCategory === parent.slug
+                    ? "bg-black text-white"
+                    : "border hover:bg-gray-50"
+                }`}
+              >
+                {parent.name}
+              </button>
+            ))}
+        </div>
+
+        {/* Subcategories of selected parent */}
+        {currentCategory &&
+          (() => {
+            const selectedParent = categories.find(
+              (c) => c.slug === currentCategory && !c.parent_id
+            );
+            if (!selectedParent) return null;
+            const children = categories.filter(
+              (c) => c.parent_id === selectedParent.id
+            );
+            if (children.length === 0) return null;
+            return (
+              <div className="flex flex-wrap gap-2 pl-2">
+                {children.map((child) => (
+                  <button
+                    key={child.id}
+                    onClick={() =>
+                      navigate({
+                        category:
+                          currentCategory === child.slug
+                            ? selectedParent.slug
+                            : child.slug,
+                      })
+                    }
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                      currentCategory === child.slug
+                        ? "bg-gray-800 text-white"
+                        : "border hover:bg-gray-50"
+                    }`}
+                  >
+                    {child.name}
+                  </button>
+                ))}
+              </div>
+            );
+          })()}
       </div>
 
       {/* Sort + results count */}
