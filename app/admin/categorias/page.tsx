@@ -43,7 +43,7 @@ export default async function AdminCategoriasPage() {
                     <p className="font-medium">{cat.name}</p>
                     <p className="text-xs text-gray-400">{cat.slug}</p>
                   </div>
-                  <DeleteCategoryButton categoryId={cat.id} />
+                  <DeleteCategoryButton categoryId={cat.id} categoryName={cat.name} />
                 </li>
               ))}
             </ul>
