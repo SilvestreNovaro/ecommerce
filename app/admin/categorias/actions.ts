@@ -18,9 +18,23 @@ export async function createCategory(formData: FormData) {
   const name = formData.get("name") as string;
   const parentId = (formData.get("parent_id") as string) || null;
 
+  let slug = slugify(name);
+
+  // If it has a parent, prefix slug with parent's slug
+  if (parentId) {
+    const { data: parent } = await supabase
+      .from("categories")
+      .select("slug")
+      .eq("id", parentId)
+      .single();
+    if (parent) {
+      slug = `${parent.slug}-${slug}`;
+    }
+  }
+
   const { error } = await supabase.from("categories").insert({
     name,
-    slug: slugify(name),
+    slug,
     parent_id: parentId,
   });
 
