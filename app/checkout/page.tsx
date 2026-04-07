@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import { createOrder } from "./actions";
 
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [shippingAddress, setShippingAddress] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
+  const submittedRef = useRef(false);
 
-  if (items.length === 0) {
+  if (items.length === 0 && !loading) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold">Checkout</h1>
@@ -26,53 +27,28 @@ export default function CheckoutPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Prevent double submission
+    if (submittedRef.current || loading) return;
+    submittedRef.current = true;
+
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
+    const address = `${fullName}\n${phone}\n${shippingAddress}`;
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const result = await createOrder(
+      items.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+      })),
+      address
+    );
 
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
-    // Create order
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .insert({
-        user_id: user.id,
-        total,
-        shipping_address: `${fullName}\n${phone}\n${shippingAddress}`,
-        status: "pending",
-      })
-      .select()
-      .single();
-
-    if (orderError || !order) {
-      setError(orderError?.message ?? "Error al crear la orden");
+    if (!result.success) {
+      setError(result.error ?? "Error al procesar la orden.");
       setLoading(false);
-      return;
-    }
-
-    // Create order items
-    const orderItems = items.map((item) => ({
-      order_id: order.id,
-      product_id: item.product.id,
-      quantity: item.quantity,
-      unit_price: item.product.price,
-    }));
-
-    const { error: itemsError } = await supabase
-      .from("order_items")
-      .insert(orderItems);
-
-    if (itemsError) {
-      setError(itemsError.message);
-      setLoading(false);
+      submittedRef.current = false;
       return;
     }
 
@@ -80,11 +56,11 @@ export default function CheckoutPage() {
     fetch("/api/emails/order-confirmation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId: order.id }),
+      body: JSON.stringify({ orderId: result.orderId }),
     }).catch(() => {});
 
     clearCart();
-    router.push(`/checkout/confirmacion?order=${order.id}`);
+    router.push(`/checkout/confirmacion?order=${result.orderId}`);
   }
 
   return (
@@ -137,14 +113,20 @@ export default function CheckoutPage() {
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <div className="rounded-md bg-red-50 border border-red-200 p-3">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full rounded-md bg-black py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
           >
-            {loading ? "Procesando..." : `Confirmar orden — ${formatPrice(total)}`}
+            {loading
+              ? "Procesando..."
+              : `Confirmar orden — ${formatPrice(total)}`}
           </button>
         </form>
 
@@ -164,6 +146,9 @@ export default function CheckoutPage() {
             <span>Total</span>
             <span>{formatPrice(total)}</span>
           </div>
+          <p className="mt-3 text-xs text-gray-400">
+            El total final se calcula en el servidor con los precios actuales.
+          </p>
         </div>
       </div>
     </main>

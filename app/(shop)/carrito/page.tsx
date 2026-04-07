@@ -72,11 +72,19 @@ export default function CarritoPage() {
                   </button>
                   <span className="text-sm font-medium">{quantity}</span>
                   <button
-                    onClick={() => updateQuantity(product.id, quantity + 1)}
-                    className="flex h-8 w-8 items-center justify-center rounded border text-sm hover:bg-gray-50"
+                    onClick={() => {
+                      if (quantity < product.stock) {
+                        updateQuantity(product.id, quantity + 1);
+                      }
+                    }}
+                    disabled={quantity >= product.stock}
+                    className="flex h-8 w-8 items-center justify-center rounded border text-sm hover:bg-gray-50 disabled:opacity-30"
                   >
                     +
                   </button>
+                  {quantity >= product.stock && (
+                    <span className="text-xs text-red-500">Máx</span>
+                  )}
                   <button
                     onClick={() => removeItem(product.id)}
                     className="ml-auto text-sm text-red-500 hover:underline"
