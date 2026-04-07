@@ -56,25 +56,42 @@ export async function updateCategory(formData: FormData) {
   redirect("/admin/categorias");
 }
 
+// Get all category IDs including subcategories
+async function getCategoryAndChildIds(supabase: ReturnType<typeof createClient> extends Promise<infer T> ? T : never, categoryId: string) {
+  const { data: children } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("parent_id", categoryId);
+  const childIds = (children ?? []).map((c) => c.id);
+  return [categoryId, ...childIds];
+}
+
 export async function getCategoryProductCount(categoryId: string) {
   const supabase = await createClient();
+  const allIds = await getCategoryAndChildIds(supabase, categoryId);
   const { count } = await supabase
     .from("products")
     .select("*", { count: "exact", head: true })
-    .eq("category_id", categoryId);
+    .in("category_id", allIds);
   return count ?? 0;
 }
 
 export async function deleteCategoryOnly(categoryId: string) {
   const supabase = await createClient();
+  const allIds = await getCategoryAndChildIds(supabase, categoryId);
 
-  // Unlink products
+  // Unlink products from this category and subcategories
   await supabase
     .from("products")
     .update({ category_id: null })
-    .eq("category_id", categoryId);
+    .in("category_id", allIds);
 
-  // Delete category
+  // Delete subcategories first, then parent (cascade should handle it but be explicit)
+  await supabase
+    .from("categories")
+    .delete()
+    .eq("parent_id", categoryId);
+
   const { error } = await supabase
     .from("categories")
     .delete()
@@ -86,14 +103,20 @@ export async function deleteCategoryOnly(categoryId: string) {
 
 export async function deleteCategoryWithProducts(categoryId: string) {
   const supabase = await createClient();
+  const allIds = await getCategoryAndChildIds(supabase, categoryId);
 
-  // Delete all products in this category
+  // Delete all products in this category and subcategories
   await supabase
     .from("products")
     .delete()
-    .eq("category_id", categoryId);
+    .in("category_id", allIds);
 
-  // Delete category
+  // Delete subcategories first, then parent
+  await supabase
+    .from("categories")
+    .delete()
+    .eq("parent_id", categoryId);
+
   const { error } = await supabase
     .from("categories")
     .delete()
