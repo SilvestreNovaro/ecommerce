@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils";
+import { WeekdayChart } from "@/components/admin/weekday-chart";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pendiente",
@@ -38,7 +39,7 @@ export default async function AdminPage() {
       .select("id, status, total, created_at, profiles(full_name)")
       .order("created_at", { ascending: false })
       .limit(5),
-    supabase.from("orders").select("total, status"),
+    supabase.from("orders").select("total, status, created_at"),
     supabase
       .from("products")
       .select("id, name, stock, slug")
@@ -85,6 +86,22 @@ export default async function AdminPage() {
   const topProducts = [...salesByProduct.values()]
     .sort((a, b) => b.sold - a.sold)
     .slice(0, 5);
+
+  // Orders by day of week
+  const DAY_NAMES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+  const weekdayData = DAY_NAMES.map((day) => ({ day, orders: 0, revenue: 0 }));
+  for (const order of allOrders ?? []) {
+    if (order.status === "cancelled") continue;
+    const dayIndex = new Date(order.created_at).getDay();
+    weekdayData[dayIndex].orders += 1;
+    weekdayData[dayIndex].revenue += order.total;
+  }
+  // Reorder to start on Monday
+  const weekdayChartData = [...weekdayData.slice(1), weekdayData[0]];
+
+  const bestDay = weekdayChartData.reduce((best, d) =>
+    d.orders > best.orders ? d : best
+  , weekdayChartData[0]);
 
   const stats = [
     { label: "Productos", value: productCount ?? 0 },
@@ -194,6 +211,23 @@ export default async function AdminPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Orders by weekday */}
+      <div className="mt-8 rounded-lg border bg-white p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold">Órdenes por día de la semana</h3>
+          {bestDay.orders > 0 && (
+            <p className="text-xs text-gray-500">
+              Mejor día: <span className="font-medium text-violet-600">{bestDay.day}</span> ({bestDay.orders} órdenes, {formatPrice(bestDay.revenue)})
+            </p>
+          )}
+        </div>
+        {(allOrders ?? []).length === 0 ? (
+          <p className="text-sm text-gray-500">Sin datos todavía.</p>
+        ) : (
+          <WeekdayChart data={weekdayChartData} />
+        )}
       </div>
 
       {/* Recent orders */}
