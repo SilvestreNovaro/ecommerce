@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils";
 import { WeekdayChart } from "@/components/admin/weekday-chart";
+import { MonthlyComparisonChart } from "@/components/admin/monthly-comparison-chart";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pendiente",
@@ -102,6 +103,60 @@ export default async function AdminPage() {
   const bestDay = weekdayChartData.reduce((best, d) =>
     d.orders > best.orders ? d : best
   , weekdayChartData[0]);
+
+  // Monthly comparison: current vs previous month, grouped by week
+  const now = new Date();
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+  const currentMonthName = currentMonthStart.toLocaleDateString("es-AR", { month: "long" });
+  const prevMonthName = prevMonthStart.toLocaleDateString("es-AR", { month: "long" });
+
+  // Build weekly data (4 weeks)
+  const monthlyData: { label: string; current: number; previous: number }[] = [];
+  let currentMonthTotal = 0;
+  let prevMonthTotal = 0;
+
+  for (let week = 0; week < 5; week++) {
+    const weekLabel = `Sem ${week + 1}`;
+    let currentWeekRevenue = 0;
+    let prevWeekRevenue = 0;
+
+    for (const order of allOrders ?? []) {
+      if (order.status === "cancelled") continue;
+      const orderDate = new Date(order.created_at);
+      const dayOfMonth = orderDate.getDate();
+      const orderWeek = Math.floor((dayOfMonth - 1) / 7);
+
+      if (orderWeek === week) {
+        if (
+          orderDate.getMonth() === now.getMonth() &&
+          orderDate.getFullYear() === now.getFullYear()
+        ) {
+          currentWeekRevenue += order.total;
+        } else if (
+          orderDate.getMonth() === prevMonthStart.getMonth() &&
+          orderDate.getFullYear() === prevMonthStart.getFullYear()
+        ) {
+          prevWeekRevenue += order.total;
+        }
+      }
+    }
+
+    currentMonthTotal += currentWeekRevenue;
+    prevMonthTotal += prevWeekRevenue;
+    monthlyData.push({
+      label: weekLabel,
+      current: currentWeekRevenue,
+      previous: prevWeekRevenue,
+    });
+  }
+
+  const monthlyChange =
+    prevMonthTotal > 0
+      ? ((currentMonthTotal - prevMonthTotal) / prevMonthTotal) * 100
+      : 0;
 
   const stats = [
     { label: "Productos", value: productCount ?? 0 },
@@ -228,6 +283,38 @@ export default async function AdminPage() {
         ) : (
           <WeekdayChart data={weekdayChartData} />
         )}
+      </div>
+
+      {/* Monthly comparison */}
+      <div className="mt-8 rounded-lg border bg-white p-5">
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="font-bold">
+            Ingresos: {currentMonthName} vs {prevMonthName}
+          </h3>
+          {prevMonthTotal > 0 && (
+            <span
+              className={`text-sm font-medium ${monthlyChange >= 0 ? "text-green-600" : "text-red-600"}`}
+            >
+              {monthlyChange >= 0 ? "+" : ""}
+              {monthlyChange.toFixed(1)}%
+            </span>
+          )}
+        </div>
+        <div className="flex gap-6 text-sm text-gray-500 mb-4">
+          <span>
+            {currentMonthName}:{" "}
+            <span className="font-medium text-black">
+              {formatPrice(currentMonthTotal)}
+            </span>
+          </span>
+          <span>
+            {prevMonthName}:{" "}
+            <span className="font-medium text-gray-700">
+              {formatPrice(prevMonthTotal)}
+            </span>
+          </span>
+        </div>
+        <MonthlyComparisonChart data={monthlyData} />
       </div>
 
       {/* Recent orders */}
