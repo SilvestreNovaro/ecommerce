@@ -60,8 +60,25 @@ export async function updateProduct(formData: FormData) {
   redirect("/admin/productos");
 }
 
-export async function deleteProduct(productId: string) {
+export async function getProductOrderCount(productId: string) {
   const supabase = await createClient();
+  const { count } = await supabase
+    .from("order_items")
+    .select("*", { count: "exact", head: true })
+    .eq("product_id", productId);
+  return count ?? 0;
+}
+
+export async function deleteProduct(productId: string, forceDelete = false) {
+  const supabase = await createClient();
+
+  if (forceDelete) {
+    // Delete order items referencing this product first
+    await supabase
+      .from("order_items")
+      .delete()
+      .eq("product_id", productId);
+  }
 
   const { error } = await supabase
     .from("products")
