@@ -1,10 +1,16 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils";
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Pendiente",
+const PAY_LABELS: Record<string, string> = {
+  pending: "Pendiente de pago",
   paid: "Pagado",
+  rejected: "Rechazado",
+};
+const LOG_LABELS: Record<string, string> = {
+  received: "Recibido",
+  preparing: "En preparación",
   shipped: "Enviado",
   delivered: "Entregado",
   cancelled: "Cancelado",
@@ -27,7 +33,7 @@ export default async function CuentaPage() {
 
   const { data: orders } = await supabase
     .from("orders")
-    .select("*")
+    .select("id, order_number, created_at, total, payment_status, logistic_status, fulfillment")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -40,28 +46,43 @@ export default async function CuentaPage() {
         <p className="text-sm text-gray-500">{profile?.email}</p>
       </div>
 
-      <h2 className="mt-12 text-2xl font-bold">Mis órdenes</h2>
+      <h2 className="mt-12 text-2xl font-bold">Mis pedidos</h2>
 
       {!orders || orders.length === 0 ? (
-        <p className="mt-4 text-gray-500">No tenés órdenes todavía.</p>
+        <p className="mt-4 text-gray-500">No tenés pedidos todavía.</p>
       ) : (
         <div className="mt-6 space-y-4">
-          {orders.map((order) => (
-            <div key={order.id} className="flex items-center justify-between rounded-lg border p-4">
-              <div>
-                <p className="font-mono text-sm">#{order.id.slice(0, 8)}</p>
-                <p className="text-xs text-gray-500">
-                  {new Date(order.created_at).toLocaleDateString("es-AR")}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="font-bold">{formatPrice(order.total)}</p>
-                <span className="inline-block mt-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs">
-                  {STATUS_LABELS[order.status] ?? order.status}
-                </span>
-              </div>
-            </div>
-          ))}
+          {orders.map((order) => {
+            const logLabel =
+              order.logistic_status === "delivered" && order.fulfillment === "pickup"
+                ? "Retirado"
+                : (LOG_LABELS[order.logistic_status] ?? order.logistic_status);
+            return (
+              <Link
+                key={order.id}
+                href={`/checkout/confirmacion?order=${order.id}`}
+                className="flex items-center justify-between rounded-lg border p-4 hover:bg-gray-50"
+              >
+                <div>
+                  <p className="font-bold">Pedido #{order.order_number}</p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(order.created_at).toLocaleDateString("es-AR")}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">{formatPrice(Number(order.total))}</p>
+                  <div className="mt-1 flex gap-1.5">
+                    <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs">
+                      {PAY_LABELS[order.payment_status] ?? order.payment_status}
+                    </span>
+                    <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs">
+                      {logLabel}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </main>

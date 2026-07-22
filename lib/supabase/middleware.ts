@@ -31,8 +31,14 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Redirect unauthenticated users away from protected routes
-  if (!user && (path.startsWith("/cuenta") || path.startsWith("/admin"))) {
+  // Redirect unauthenticated users away from protected routes.
+  // El backoffice tiene su propio login (/admin/login); la tienda usa /login.
+  if (!user && path.startsWith("/admin") && path !== "/admin/login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin/login";
+    return NextResponse.redirect(url);
+  }
+  if (!user && path.startsWith("/cuenta")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

@@ -39,6 +39,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          permissions: Json | null
+          role: Database["public"]["Enums"]["admin_role"]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          permissions?: Json | null
+          role?: Database["public"]["Enums"]["admin_role"]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          permissions?: Json | null
+          role?: Database["public"]["Enums"]["admin_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          admin_email: string | null
+          admin_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          admin_email?: string | null
+          admin_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          admin_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -397,7 +466,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      admin_role: "admin" | "operador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -527,6 +596,8 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      admin_role: ["admin", "operador"],
+    },
   },
 } as const

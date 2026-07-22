@@ -42,7 +42,7 @@ Proyecto conjunto de **Silvestre** (dueño del repo) y **Joaco** (colaborador, u
 
 | # | Módulo | Qué se replica de SUK | Estado |
 |---|--------|----------------------|--------|
-| 1 | **Pedidos** | TODO el flujo actual de SUK: estado de **pago** separado del **logístico**, `order_number` legible, confirmar pago 1-click (pendiente→pagado + recibido→preparación), avanzar estado logístico, cancelar, retiro vs envío con estados propios, filtros por estado/pago, búsqueda por N°/cliente/ID, filtro por fechas. SIN previews/print-files. | ⬜ |
+| 1 | **Pedidos** | TODO el flujo actual de SUK: estado de **pago** separado del **logístico**, `order_number` legible, confirmar pago 1-click (pendiente→pagado + recibido→preparación), avanzar estado logístico, cancelar, retiro vs envío con estados propios, filtros por estado/pago, búsqueda por N°/cliente/ID, filtro por fechas. SIN previews/print-files. | ✅ 2026-07-22 |
 | 2 | **Catálogo** | Gestión de productos estilo SUK: edición inline de precios en la lista, ordenar arrastrando, duplicar, destacados a dedo (`featured`), galería de imágenes por producto (drag&drop + portada), búsqueda por ID/nombre/slug. | ⬜ |
 | 3 | **Clientes** | Listado + detalle de clientes como SUK. | ⬜ |
 | 4 | **Promociones** | Modelo de precios SUK: `base_price` (normal) + `promo_price` (opcional) + **% descuento por transferencia GLOBAL** (`store_settings`, toggle + % editable en admin). Cálculo único server-side (`lib/pricing.ts`). | ⬜ |
@@ -59,6 +59,36 @@ banners + destacados + galería mascotas, catálogo, detalle, carrito, checkout 
 **Pendientes de decisión del dueño** (no bloquean): Mercado Pago (SUK lo tiene LIVE; Nalika necesitaría
 su propia cuenta/token — mientras tanto, checkout por transferencia + confirmación manual), dominio
 propio, identidad visual definitiva (logo/colores de Nalika).
+
+### Avance del rediseño
+
+**2026-07-22 — Infra admin + Módulo 1 (Pedidos) COMPLETOS:**
+- **Migraciones nuevas**: `20260722100000_orders_v2` (modelo de órdenes SUK: payment/logistic
+  separados, order_number, retiro/envío, pending_orders para MP futuro; dropea el modelo viejo) y
+  `20260722110000_admin_users` (enum `admin_role`, `admin_users` RLS deny-all, `audit_logs`; seed:
+  los dos hermanos como admin).
+- **Infra admin** (patrón SUK): `lib/permissions.ts` (puro, secciones+roles+readonly),
+  `lib/admin-auth.ts` (`getAdminUser` con bootstrap por env `ADMIN_EMAILS`, `requireSection`,
+  `requireWrite`, `verifyAdmin*`), `lib/audit.ts` (fail-open), `lib/bank.ts` (env `BANK_*` con
+  placeholders + WhatsApp helper).
+- **Backoffice nuevo**: el admin viejo se BORRÓ entero (páginas + componentes + reportes/inventario).
+  Ahora: `/admin/login` propio (fuera del grupo protegido), `app/admin/(protected)/layout.tsx` con
+  sidebar (logo, "Ver sitio", nav filtrado por permisos, email+rol+**Cerrar sesión**), `/admin` →
+  redirect a pedidos. Middleware: `/admin/*` sin sesión → `/admin/login`.
+- **Pedidos admin**: listado con búsqueda N°/cliente/ID + rango de fechas + chips por estado
+  logístico y pago (client-side, últimas 200); detalle con ítems (thumb de producto + lightbox),
+  cliente, entrega y acciones: **confirmar pago 1-click** (pending→paid + received→preparing,
+  auditado), avanzar logístico (pickup: "Marcar como retirado"), cancelar.
+- **Checkout nuevo** (tienda): contacto (teléfono solo números) + retiro/envío (envío: costo NO
+  incluido, se coordina por WhatsApp) + pago transferencia (MP deshabilitado "próximamente").
+  Server action recalcula precios desde DB, garantiza profile, crea orden vía service role,
+  descuenta stock + `stock_movements`, email de confirmación con datos bancarios (fail-open).
+  Confirmación muestra N° de pedido + datos de transferencia + CTA WhatsApp. `/cuenta` lista
+  pedidos con ambos estados.
+- **Tema**: tokens SUK en `globals.css` (`ink/paper/cloud/brand/save`) vía `@theme` de Tailwind 4.
+- **Envs nuevas**: `ADMIN_EMAILS` (cargada en Vercel+local). Pendientes de valores reales:
+  `BANK_HOLDER/NAME/CBU/ALIAS/CUIT`, `NEXT_PUBLIC_WHATSAPP`, `RESEND_FROM` (hoy placeholders).
+- ⚠️ Checkout e2e SIN probar aún: la DB no tiene productos (falta módulo 2 Catálogo).
 
 ## Convenciones (heredadas de SUK/B2B)
 
