@@ -121,6 +121,28 @@ crema `#faf6f0` (`cream`) + arena `#e9e4de` (`sand`) + verde ahorro `#16a34a` (s
   carrito/checkout sin cantidades. (El stock exacto vive solo en el admin.)
 - Home: "Bienvenido a **nalika** 🐾" + subtítulo cálido mascotero.
 
+## 👉 Dónde quedamos (retomar acá — cierre 2026-07-22)
+
+**TODO EL PLAN DE 10 MÓDULOS + BRANDING + UX ESTÁ LIVE en https://nalika.vercel.app.**
+Día único de rediseño completo: admin SUK entero, identidad terracota/Baloo, tienda vestida.
+
+**Datos de prueba cargados** (para demo/testing, todos borrables):
+- 12 productos seed (6 categorías) — ⚠️ HOY todos comparten UNA foto real de prueba (Royal Canin,
+  `product-images/seed2/foto-real-prueba.jpg`) que Joaco pidió aplicar; las 12 ilustraciones
+  v3 generadas siguen en `seed2/<slug>.png` por si quieren volver.
+- 8 pedidos de prueba (clientes "Marina López (PRUEBA)" / "Diego Fernández (PRUEBA)", emails
+  `@nalika.test`) cubriendo todos los estados y fechas de 20 días — para probar filtros.
+- 6 fotos placeholder en Galería Mascotas · 3 banners v3 en la home.
+- Limpieza cuando haya datos reales: borrar por "(PRUEBA)" / `@nalika.test` desde Consultas SQL
+  o el dashboard.
+
+**Pendientes (acciones de los dueños, nada bloquea):**
+1. `BANK_*` reales en Vercel (checkout muestra placeholders) + `NEXT_PUBLIC_WHATSAPP` real.
+2. Cambiar password de Silvestre (débil) — vía `/admin/usuarios` reset directo.
+3. Compra e2e de control (carrito → transferencia → confirmar pago en admin).
+4. Fotos reales de productos (sacar cuadradas o con aire; se cargan por producto en el admin).
+5. Futuro: Mercado Pago (cuenta propia) · dominio propio · emails desde dominio (RESEND_FROM).
+
 ### Avance del rediseño
 
 **2026-07-22 — Infra admin + Módulo 1 (Pedidos) COMPLETOS:**
