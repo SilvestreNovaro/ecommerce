@@ -108,6 +108,60 @@ export type Database = {
         }
         Relationships: []
       }
+      banners: {
+        Row: {
+          activo: boolean
+          bg: string | null
+          created_at: string
+          cta_href: string | null
+          cta_label: string | null
+          eyebrow: string | null
+          id: string
+          image_desktop_url: string | null
+          image_mobile_url: string | null
+          orden: number
+          section: string
+          subtitulo: string | null
+          text_light: boolean
+          titulo: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          bg?: string | null
+          created_at?: string
+          cta_href?: string | null
+          cta_label?: string | null
+          eyebrow?: string | null
+          id?: string
+          image_desktop_url?: string | null
+          image_mobile_url?: string | null
+          orden?: number
+          section?: string
+          subtitulo?: string | null
+          text_light?: boolean
+          titulo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          bg?: string | null
+          created_at?: string
+          cta_href?: string | null
+          cta_label?: string | null
+          eyebrow?: string | null
+          id?: string
+          image_desktop_url?: string | null
+          image_mobile_url?: string | null
+          orden?: number
+          section?: string
+          subtitulo?: string | null
+          text_light?: boolean
+          titulo?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string

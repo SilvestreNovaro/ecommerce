@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductFilters } from "@/components/shop/product-filters";
+import SectionBanner from "@/components/shop/section-banner";
 import { computePrices } from "@/lib/pricing";
 import { getStoreSettings } from "@/lib/settings";
+import { getBannerSlides } from "@/lib/banners";
 import type { Product, Category } from "@/types";
 
 export const metadata: Metadata = {
@@ -59,11 +61,19 @@ export default async function ProductosPage({ searchParams }: Props) {
     query = query.order("sort_order", { ascending: true }).order("created_at", { ascending: false });
   }
 
-  const [{ data: products }, settings] = await Promise.all([query, getStoreSettings()]);
+  const [{ data: products }, settings, bannerSlides] = await Promise.all([
+    query,
+    getStoreSettings(),
+    getBannerSlides("productos"),
+  ]);
   const items = (products ?? []) as Product[];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <>
+      {/* Franja de banners de la sección (si no hay activos, no renderiza). */}
+      <SectionBanner slides={bannerSlides} />
+
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-bold">Productos</h1>
 
       <div className="mt-6">
@@ -91,6 +101,7 @@ export default async function ProductosPage({ searchParams }: Props) {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

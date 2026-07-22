@@ -12,7 +12,8 @@ export async function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      {/* Alto FIJO (72px): el hero de la home calcula su alto con --nav-h. */}
+      <nav className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="text-xl font-bold">
           Tienda
         </Link>

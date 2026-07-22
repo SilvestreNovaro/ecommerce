@@ -17,6 +17,12 @@
   --color-save: #16a34a;
 }
 
+/* Alto del header sticky de la tienda (72px + 1px de borde). Lo usa el hero
+   full-viewport de la home: h-[calc(100svh-var(--nav-h))]. */
+:root {
+  --nav-h: 73px;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }

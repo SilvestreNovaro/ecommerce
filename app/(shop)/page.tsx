@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/shop/product-card";
+import HeroCarousel from "@/components/shop/hero-carousel";
 import { computePrices } from "@/lib/pricing";
 import { getStoreSettings } from "@/lib/settings";
+import { getBannerSlides } from "@/lib/banners";
 import type { Product, Category } from "@/types";
 
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [{ data: products }, { data: categoriesData }, settings] = await Promise.all([
+  const [{ data: products }, { data: categoriesData }, settings, heroSlides] = await Promise.all([
     supabase
       .from("products")
       .select("*")
@@ -19,12 +21,17 @@ export default async function HomePage() {
       .limit(8),
     supabase.from("categories").select("*").order("name"),
     getStoreSettings(),
+    getBannerSlides("home"),
   ]);
 
   const categories = (categoriesData ?? []) as Category[];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <>
+      {/* Hero carrusel de banners (full viewport). Si no hay banners activos, nada. */}
+      {heroSlides.length > 0 && <HeroCarousel slides={heroSlides} />}
+
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <section className="text-center">
         <h1 className="text-4xl font-bold tracking-tight">
           Bienvenido a nuestra tienda
@@ -77,6 +84,7 @@ export default async function HomePage() {
           </div>
         )}
       </section>
-    </div>
+      </div>
+    </>
   );
 }

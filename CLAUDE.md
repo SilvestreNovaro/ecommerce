@@ -46,7 +46,7 @@ Proyecto conjunto de **Silvestre** (dueño del repo) y **Joaco** (colaborador, u
 | 2 | **Catálogo** | Gestión de productos estilo SUK: edición inline de precios en la lista, ordenar arrastrando, duplicar, destacados a dedo (`featured`), galería de imágenes por producto (drag&drop + portada), búsqueda por ID/nombre/slug. | ✅ 2026-07-22 |
 | 3 | **Clientes** | Listado + detalle de clientes como SUK. | ✅ 2026-07-22 |
 | 4 | **Promociones** | Modelo de precios SUK: `base_price` (normal) + `promo_price` (opcional) + **% descuento por transferencia GLOBAL** (`store_settings`, toggle + % editable en admin). Cálculo único server-side (`lib/pricing.ts`). | ✅ 2026-07-22 |
-| 5 | **Banners** | Admin de banners por sección del sitio + bucket `banners` + carrusel hero full-viewport en la home. Specs SUK: desktop **1920×1080**, mobile **1080×1920**. Banners genéricos de mascotas hasta tener reales. | ⬜ |
+| 5 | **Banners** | Admin de banners por sección del sitio + bucket `banners` + carrusel hero full-viewport en la home. Specs SUK: desktop **1920×1080**, mobile **1080×1920**. Banners genéricos de mascotas hasta tener reales. | ✅ 2026-07-22 |
 | 6 | **Galería Mascotas** | = "Suk Comunidad" renombrado: fotos de clientes/mascotas, admin para subir/ordenar/activar/eliminar, sección en home + página propia. | ⬜ |
 | 7 | **Exportar CSV** | `/admin/exportar` + endpoint de export como SUK (con protección CSV injection). | ✅ 2026-07-22 |
 | 8 | **Consultas SQL** | Consola solo-SELECT del admin: RPC `execute_readonly_query` (solo `service_role`, revocada a anon/authenticated), queries guardadas, auditoría. | ⬜ |
@@ -162,6 +162,44 @@ propio, identidad visual definitiva (logo/colores de Nalika).
 - **Fix moneda**: `formatPrice` estaba en CLP/es-CL (leftover) → ahora **ARS/es-AR** sin decimales.
 - Verificado contra la DB real: seed de `store_settings` OK, CHECKs de `promotions` rechazan
   filas incoherentes, columnas nuevas de `orders` OK. `types/supabase.ts` regenerado.
+
+**2026-07-22 — Módulo 5 (Banners) COMPLETO:**
+- **Migración** `20260722140000_banners` (aplicada): tabla `banners` (modelo final de SUK, ya con
+  `section` — nace fusionada 0005+0008: section/eyebrow/titulo/subtitulo/cta_label/cta_href/
+  image_desktop_url/image_mobile_url/bg CSS fallback/text_light/orden/activo) con RLS select
+  público y escritura solo service role; **bucket Storage `banners` público** (insert en
+  `storage.buckets` + policy de lectura pública). `types/supabase.ts` regenerado.
+- **Secciones fijas** en `lib/banner-sections.ts` (módulo puro): `home` (Inicio, hero
+  full-viewport), `productos` (franja superior) y `galeria` (franja superior; la página llega con
+  el módulo 6 — la sección ya queda lista en el admin).
+- **Admin `/admin/banners`** (patrón BannersClient de SUK → `components/admin/banners-admin.tsx`):
+  agrupados por sección con "+ Banner" por sección; card con preview (imagen o fondo CSS), ↑/↓
+  orden, toggle activo, editar y eliminar (borra también las imágenes del bucket, con
+  `confirm-delete-button`). Modal: selector de sección, **specs visibles** (desktop 1920×1080 ·
+  mobile 1080×1920 · JPG/WebP ideal <1MB, aire en el centro), upload desktop+mobile (server action
+  al bucket, MIME png/jpg/webp máx 8MB, path `banner-<ts>-<rand>.<ext>`; al reemplazar/quitar borra
+  la anterior del bucket), campo `bg` CSS con preview en vivo, eyebrow/título/subtítulo, CTA
+  (texto+link), orden, checkboxes texto claro/activo. Todo con `requireWrite("banners")` +
+  `audit()` + **validaciones de seguridad replicadas de SUK**: `cta_href` solo rutas internas
+  `/...` o `https?://`, y `bg` CSS sanitizado (bloquea `javascript:`, `expression(`, `<`,
+  `@import`).
+- **Front**: `lib/banners.ts` (`getBannerSlides(section)`, lectura pública con anon client),
+  `components/shop/hero-carousel.tsx` (port de SUK: full viewport `100svh - var(--nav-h)`,
+  autoplay 5s + flechas + dots, art direction imagen mobile <sm / desktop sm+, overlay negro 30% +
+  eyebrow/título/subtítulo/CTA en claro u oscuro según `text_light`, fallback al `bg` CSS) y
+  `components/shop/section-banner.tsx` (franja h-44/56/64 para internas). Home: hero arriba de
+  todo SOLO si hay banners activos de `home`; `/productos` con la franja de la sección
+  `productos`. Para el alto exacto del hero: header de la tienda ahora con **alto fijo 72px** +
+  var global `--nav-h: 73px` en `globals.css`.
+- **Seed** `scripts/seed-banners.mjs` (idempotente por título, lee `.env.local` tolerando BOM,
+  service role): subió las 6 imágenes de `C:\Users\joaqu\ecommerce-assets\banners` al bucket e
+  insertó los 3 banners de `home` (Nalika teal / Alimento premium ámbar / Juguetes índigo, orden
+  1-3, activos, text_light, CTA "Ver productos" → `/productos`, `bg` gradiente a tono).
+  **Ejecutado y verificado**: anon lee los 3 banners, las 6 imágenes responden 200 públicas y la
+  home sirve el carrusel. ⚠️ Las imágenes placeholder traen el texto PINTADO adentro, y el overlay
+  del hero repite ese texto encima (quedó coherente a propósito) — cuando haya banners
+  fotográficos reales, dejar aire en el centro y el overlay hace de texto único; si molesta el
+  doble texto mientras tanto, vaciar título/subtítulo desde el admin.
 
 **2026-07-22 — Módulos 3 (Clientes) y 7 (Exportar CSV) COMPLETOS:**
 - **Clientes admin** (`/admin/clientes` + `[id]`, patrón SUK, solo lectura): listado desde `profiles`
