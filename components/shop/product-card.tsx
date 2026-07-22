@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
+import { QuickAddButton } from "@/components/shop/quick-add-button";
 import type { ProductPrices } from "@/lib/pricing";
 import type { Product } from "@/types";
 
@@ -54,9 +55,8 @@ export function ProductCard({ product, prices }: { product: Product; prices?: Pr
             </p>
           )}
         </div>
-        {product.stock === 0 && (
-          <p className="mt-1 text-sm text-red-500">Agotado</p>
-        )}
+        {/* Compra rápida sin entrar al producto (pedido de Joaco) */}
+        <QuickAddButton product={product} />
       </div>
     </Link>
   );

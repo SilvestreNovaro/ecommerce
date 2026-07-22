@@ -36,11 +36,11 @@ export default async function HomePage() {
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <section className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight">
-          Bienvenido a nuestra tienda
+        <h1 className="font-display text-4xl font-bold tracking-tight text-ink">
+          Bienvenido a <span className="text-brand">nalika</span> 🐾
         </h1>
-        <p className="mt-4 text-lg text-gray-600">
-          Descubre los mejores productos al mejor precio.
+        <p className="mt-4 text-lg text-ink/60">
+          Todo lo que tu mejor amigo necesita, elegido con el mismo amor con el que lo cuidás.
         </p>
       </section>
 

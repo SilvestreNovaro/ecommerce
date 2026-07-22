@@ -97,10 +97,9 @@ export default async function ProductoDetallePage({ params }: Props) {
             )}
           </div>
 
+          {/* Sin cantidades de stock en el front (pedido de Joaco): solo disponibilidad. */}
           {product.stock > 0 ? (
-            <p className="mt-2 text-sm text-green-600">
-              {product.stock} en stock
-            </p>
+            <p className="mt-2 text-sm font-medium text-save">✓ Disponible</p>
           ) : (
             <p className="mt-2 text-sm text-red-500">Agotado</p>
           )}

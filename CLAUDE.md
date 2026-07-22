@@ -107,6 +107,20 @@ crema `#faf6f0` (`cream`) + arena `#e9e4de` (`sand`) + verde ahorro `#16a34a` (s
 - Logo agrandado de verdad: navbar 44 · footer 42 · sidebar admin 38 · login admin 42.
 - **Botón flotante de WhatsApp** (`components/shop/whatsapp-button.tsx`) en todo el sitio público.
 
+**2026-07-22 — Lote UX de tienda (pedidos de Joaco en caliente):**
+- **Buscador con sugerencias**: `GET /api/search/suggest` (productos activos + categorías, ilike
+  escapado, cache 30s) + dropdown con thumb/precio, navegación por flechas/Enter/Esc, "Ver todos
+  los resultados". Buscador ancho estilo marketplace (crema/terracota, placeholder "¿Qué busca tu
+  mascota?"); se fue el último focus violeta.
+- **CartWidget patrón SUK** (`components/layout/cart-widget.tsx`, reemplaza `cart-badge`):
+  mini-cart al hover (desktop) + **drawer lateral por portal** al click, con qty ±, eliminar,
+  desglose real de `useCartQuote` (promos + transferencia + "Ahorrás $X") y CTAs checkout/carrito.
+- **Compra rápida desde la card** (`quick-add-button.tsx` dentro de `ProductCard`): agrega al
+  carrito sin entrar al producto, feedback "✓ Agregado", corta en el stock disponible.
+- **Sin stock numérico en el front**: detalle muestra "✓ Disponible"/"Agotado", mensajes de
+  carrito/checkout sin cantidades. (El stock exacto vive solo en el admin.)
+- Home: "Bienvenido a **nalika** 🐾" + subtítulo cálido mascotero.
+
 ### Avance del rediseño
 
 **2026-07-22 — Infra admin + Módulo 1 (Pedidos) COMPLETOS:**

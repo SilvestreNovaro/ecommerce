@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { NalikaLogo } from "@/components/logo";
-import { CartBadge } from "./cart-badge";
+import { CartWidget } from "./cart-widget";
 import { SearchBar } from "./search-bar";
 import { MobileMenu } from "./mobile-menu";
 
@@ -50,13 +50,13 @@ export async function Header() {
               Ingresar
             </Link>
           )}
-          <CartBadge />
+          <CartWidget />
         </div>
 
         {/* Acciones mobile */}
         <div className="ml-auto flex items-center gap-1 md:hidden">
           <SearchBar />
-          <CartBadge />
+          <CartWidget />
           <MobileMenu isLoggedIn={!!user} categories={categories} />
         </div>
       </div>

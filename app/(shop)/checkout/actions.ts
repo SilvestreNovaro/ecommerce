@@ -81,7 +81,7 @@ export async function createOrder(input: CheckoutInput): Promise<CheckoutResult>
         error:
           line.stock === 0
             ? `"${line.name}" está agotado.`
-            : `"${line.name}" solo tiene ${line.stock} unidades disponibles.`,
+            : `"${line.name}" no tiene suficientes unidades disponibles. Bajá la cantidad.`,
       };
     }
     validated.push({

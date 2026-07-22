@@ -14,7 +14,7 @@ export function AddToCartButton({ product }: { product: Product }) {
 
   function handleAdd() {
     if (!canAdd) {
-      setMessage(`Solo hay ${product.stock} en stock`);
+      setMessage("No hay más unidades disponibles");
       setTimeout(() => setMessage(""), 2000);
       return;
     }
