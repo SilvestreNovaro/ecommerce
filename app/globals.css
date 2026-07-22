@@ -4,16 +4,20 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-geist-sans);
+  --font-logo: var(--font-baloo);
 }
 
-/* Paleta Nalika (heredada del patrón SUK; identidad definitiva pendiente) */
+/* Paleta Nalika — identidad definida 2026-07-22 (logo 2a "huella-corazón"):
+   terracota como color de marca + neutros cálidos. */
 @theme {
   --color-ink: #16171d;
   --color-paper: #ffffff;
   --color-cloud: #f6f6f9;
-  --color-brand: #16171d;
-  --color-brand-light: #3a3b42;
-  --color-brand-dark: #33343d;
+  --color-cream: #faf6f0;
+  --color-sand: #e9e4de;
+  --color-brand: #e07a5f;
+  --color-brand-light: #eda28d;
+  --color-brand-dark: #c9603f;
   --color-save: #16a34a;
 }
 

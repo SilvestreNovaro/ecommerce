@@ -58,7 +58,19 @@ banners + destacados + galería mascotas, catálogo, detalle, carrito, checkout 
 
 **Pendientes de decisión del dueño** (no bloquean): Mercado Pago (SUK lo tiene LIVE; Nalika necesitaría
 su propia cuenta/token — mientras tanto, checkout por transferencia + confirmación manual), dominio
-propio, identidad visual definitiva (logo/colores de Nalika).
+propio. ~~Identidad visual~~ ✅ definida 2026-07-22 (ver "Branding").
+
+### Branding (definido 2026-07-22)
+
+Logo elegido por Joaco vía Claude Design: variante **2a "huella-corazón"** (3 almohadillas + corazón
+como palma). Wordmark "nalika" en minúsculas, **Baloo 2 SemiBold** (next/font, var `--font-baloo` →
+`font-logo`). Paleta: **terracota `#E07A5F`** (brand, con light/dark para hover) + tinta `#16171d` +
+crema `#faf6f0` (`cream`) + arena `#e9e4de` (`sand`) + verde ahorro `#16a34a` (se mantiene).
+- Componentes en `components/logo.tsx`: `PawHeart` (isotipo, size/color) y `NalikaLogo` (isotipo +
+  wordmark, prop `light` para fondos oscuros). Usados en: navbar tienda, sidebar admin, login admin.
+- Favicon: `app/icon.svg` (isotipo sobre crema redondeada; `app/favicon.ico` eliminado).
+- Los botones `bg-brand` del admin pasaron automáticamente a terracota vía token.
+- Fuente original de la elección: `C:\Users\joaqu\Downloads\Nalika Logo.html` (rondas de propuestas).
 
 ### Avance del rediseño
 

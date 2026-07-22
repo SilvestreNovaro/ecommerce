@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { NalikaLogo } from "@/components/logo";
 import { getAdminUser } from "@/lib/admin-auth";
 import { AdminProvider } from "@/components/admin/admin-context";
 import AdminNav from "@/components/admin/admin-nav";
@@ -18,12 +19,9 @@ export default async function AdminLayout({
       <div className="min-h-screen bg-cloud md:flex">
         {/* Sidebar */}
         <aside className="flex flex-col gap-4 border-b border-black/5 bg-white p-4 md:min-h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🐾</span>
-            <div>
-              <p className="font-display text-sm font-extrabold leading-tight text-ink">Nalika</p>
-              <p className="text-[10px] uppercase tracking-wide text-ink/40">Backoffice</p>
-            </div>
+          <div className="flex flex-col gap-0.5">
+            <NalikaLogo size={26} />
+            <p className="text-[10px] uppercase tracking-wide text-ink/40">Backoffice</p>
           </div>
 
           <Link

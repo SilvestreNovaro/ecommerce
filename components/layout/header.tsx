@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { NalikaLogo } from "@/components/logo";
 import { CartBadge } from "./cart-badge";
 import { SearchBar } from "./search-bar";
 import { MobileMenu } from "./mobile-menu";
@@ -14,8 +15,8 @@ export async function Header() {
     <header className="sticky top-0 z-50 border-b bg-white">
       {/* Alto FIJO (72px): el hero de la home calcula su alto con --nav-h. */}
       <nav className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="text-xl font-bold">
-          Tienda
+        <Link href="/" aria-label="Nalika — inicio">
+          <NalikaLogo size={30} />
         </Link>
 
         {/* Desktop nav */}

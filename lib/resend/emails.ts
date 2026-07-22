@@ -31,7 +31,7 @@ export async function sendOrderConfirmation(input: OrderEmailInput): Promise<voi
 
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#16171d">
-      <h1 style="font-size:20px">🐾 ¡Gracias por tu compra, ${escapeHtml(input.customerName)}!</h1>
+      <h1 style="font-size:20px;color:#E07A5F">🐾 ¡Gracias por tu compra, ${escapeHtml(input.customerName)}!</h1>
       <p>Recibimos tu pedido <strong>#${input.orderNumber}</strong>.</p>
       <ul>${itemsHtml}</ul>
       <p><strong>Total: ${money(input.total)}</strong></p>

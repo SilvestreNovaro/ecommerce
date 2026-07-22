@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Baloo_2 } from "next/font/google";
 import { CartProvider } from "@/lib/cart-context";
 import "./globals.css";
 
@@ -11,6 +11,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Tipografía del wordmark del logo (Baloo 2 SemiBold).
+const balooLogo = Baloo_2({
+  variable: "--font-baloo",
+  subsets: ["latin"],
+  weight: "600",
 });
 
 export const metadata: Metadata = {
@@ -41,7 +48,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${balooLogo.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-gray-50">
         <CartProvider>{children}</CartProvider>
