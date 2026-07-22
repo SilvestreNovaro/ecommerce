@@ -90,6 +90,14 @@ propio, identidad visual definitiva (logo/colores de Nalika).
   `BANK_HOLDER/NAME/CBU/ALIAS/CUIT`, `NEXT_PUBLIC_WHATSAPP`, `RESEND_FROM` (hoy placeholders).
 - ⚠️ Checkout e2e SIN probar aún: la DB no tiene productos (falta módulo 2 Catálogo).
 
+**2026-07-22 — Separación admin/tienda (patrón SUK, entró en el commit del Catálogo):**
+- `app/layout.tsx` raíz quedó SIN chrome (solo fonts + CartProvider + metadata). El sitio público
+  tiene Header/Footer en `app/(shop)/layout.tsx`; el backoffice usa su propio chrome. `checkout`,
+  `cuenta` y `(auth)` (login/registro) se movieron ADENTRO de `(shop)` (URLs sin cambios).
+- Metadata/OG del sitio renombrada: "Nalika — Tienda de mascotas" (antes "Tienda Online").
+- Assets listos para el módulo 5: 6 banners placeholder generados (3 diseños × desktop 1920×1080 +
+  mobile 1080×1920) en `C:\Users\joaqu\ecommerce-assets\banners` (fuera del repo).
+
 **2026-07-22 — Módulo 2 (Catálogo) COMPLETO:**
 - **Migración** `20260722120000_catalog_v2` (aplicada): `products.featured` + `products.sort_order`
   + `products.promo_price` (integer nullable, CHECK > 0; `price` queda como precio normal) y tabla
