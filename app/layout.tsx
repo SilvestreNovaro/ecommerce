@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Tipografía del wordmark del logo (Baloo 2 SemiBold).
+// Baloo 2: wordmark del logo (600) y títulos display (600/700).
 const balooLogo = Baloo_2({
   variable: "--font-baloo",
   subsets: ["latin"],
-  weight: "600",
+  weight: ["600", "700"],
 });
 
 export const metadata: Metadata = {

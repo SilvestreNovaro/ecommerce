@@ -63,7 +63,7 @@ export default function CheckoutPage() {
   }
 
   const inputCls =
-    "mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black";
+    "mt-1 w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand";
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -165,7 +165,7 @@ export default function CheckoutPage() {
 
           <h2 className="text-lg font-bold">Pago</h2>
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border-2 border-black p-4">
+            <div className="rounded-lg border-2 border-brand p-4">
               <p className="font-semibold">🏦 Transferencia bancaria</p>
               <p className="mt-1 text-xs text-gray-500">
                 Al confirmar te mostramos los datos para transferir. El pedido entra en preparación
@@ -187,7 +187,7 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-black py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+            className="w-full rounded-md bg-brand py-3 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50"
           >
             {loading ? "Procesando..." : `Confirmar pedido — ${formatPrice(quote?.total ?? total)}`}
           </button>
@@ -263,7 +263,7 @@ function FulfillmentCard({
       type="button"
       onClick={onClick}
       className={`rounded-lg border-2 p-4 text-left transition-colors ${
-        active ? "border-black" : "border-gray-200 hover:border-gray-300"
+        active ? "border-brand" : "border-gray-200 hover:border-gray-300"
       }`}
     >
       <p className="font-semibold">{title}</p>

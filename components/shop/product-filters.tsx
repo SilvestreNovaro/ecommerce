@@ -49,7 +49,7 @@ export function ProductFilters({
         />
         <button
           type="submit"
-          className="rounded-lg bg-black px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
+          className="rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-dark"
         >
           Buscar
         </button>
@@ -74,7 +74,7 @@ export function ProductFilters({
             onClick={() => navigate({ category: undefined })}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
               !currentCategory
-                ? "bg-black text-white"
+                ? "bg-brand text-white"
                 : "border hover:bg-gray-50"
             }`}
           >
@@ -95,7 +95,7 @@ export function ProductFilters({
                 }
                 className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   currentCategory === parent.slug
-                    ? "bg-black text-white"
+                    ? "bg-brand text-white"
                     : "border hover:bg-gray-50"
                 }`}
               >

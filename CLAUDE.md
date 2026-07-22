@@ -72,6 +72,27 @@ crema `#faf6f0` (`cream`) + arena `#e9e4de` (`sand`) + verde ahorro `#16a34a` (s
 - Los botones `bg-brand` del admin pasaron automáticamente a terracota vía token.
 - Fuente original de la elección: `C:\Users\joaqu\Downloads\Nalika Logo.html` (rondas de propuestas).
 
+**2026-07-22 — Pasada de branding en front + contenido de prueba (pedidos de Joaco):**
+- Logo agrandado: navbar 38px, sidebar admin 32px, login admin 36px.
+- **Footer negro estilo SUK** (`bg-ink`): logo en versión clara, columnas Tienda/Mi cuenta/Contacto
+  + botón WhatsApp verde. Hovers en terracota claro.
+- **Categorías en la navegación**: barra bajo el header en desktop (fondo `cream`, chips hover
+  terracota, solo categorías raíz → `/productos?category=<slug>`) + chips en el menú hamburguesa
+  mobile. `--nav-h` ahora es responsive (73px mobile / 118px desktop) para el hero.
+- **Tipografía**: se eliminó el `body { font-family: Arial }` legacy → cuerpo en Geist
+  (`--font-sans`); `font-display` ahora es **Baloo 2** (600/700, la fuente del logo) para títulos.
+- **Paleta terracota esparcida por la tienda**: todos los CTAs/acentos que quedaban en negro
+  (`bg-black`, `hover:bg-gray-800`, `border-black`, `focus:ring-black`) pasaron a `brand`/
+  `brand-dark` en home, login, registro, carrito, checkout, confirmación, filtros, badge del
+  carrito y 404. (Los `bg-black/5` de superficie quedaron, son neutrales.)
+- **12 productos seed con imagen**: generadas 800×800 (fondo pastel por categoría + isotipo
+  huella-corazón + nombre), subidas a `product-images/seed/`, `products.image_url` +
+  `product_images` seteados. Script: `C:\Users\joaqu\ecommerce-assets\gen-product-images.ps1`.
+- **Banners v2 SIN doble texto** (pedido de Joaco): regenerados en paleta de marca (terracota /
+  crema / salvia) con la patita integrada y el texto pintado SOLO en la imagen; las filas de
+  `banners` quedaron con `titulo` vacío (el overlay ya no duplica; se mantiene el CTA). Archivos
+  viejos borrados del bucket. Script: `gen-banners-v2.ps1` (misma carpeta de assets).
+
 ### Avance del rediseño
 
 **2026-07-22 — Infra admin + Módulo 1 (Pedidos) COMPLETOS:**

@@ -154,7 +154,7 @@ export default function CarritoPage() {
           )}
           <Link
             href="/checkout"
-            className="mt-6 block w-full rounded-md bg-black py-3 text-center text-sm font-medium text-white hover:bg-gray-800"
+            className="mt-6 block w-full rounded-md bg-brand py-3 text-center text-sm font-medium text-white hover:bg-brand-dark"
           >
             Ir al checkout
           </Link>

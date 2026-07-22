@@ -4,7 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 
-export function MobileMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
+type Category = { name: string; slug: string };
+
+export function MobileMenu({
+  isLoggedIn,
+  categories = [],
+}: {
+  isLoggedIn: boolean;
+  categories?: Category[];
+}) {
   const [open, setOpen] = useState(false);
   const { itemCount } = useCart();
 
@@ -48,6 +56,27 @@ export function MobileMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
               className="text-sm py-2 hover:underline"
             >
               Productos
+            </Link>
+            {categories.length > 0 && (
+              <div className="flex flex-wrap gap-2 pb-1">
+                {categories.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/productos?category=${c.slug}`}
+                    onClick={() => setOpen(false)}
+                    className="rounded-full bg-cream px-3 py-1 text-xs font-medium text-ink/70"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+            <Link
+              href="/galeria"
+              onClick={() => setOpen(false)}
+              className="text-sm py-2 hover:underline"
+            >
+              Galería Mascotas
             </Link>
             <Link
               href="/carrito"

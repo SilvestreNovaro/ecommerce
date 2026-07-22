@@ -33,7 +33,7 @@ export default function AdminLoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-cloud px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-2xl border border-black/5 bg-white p-8">
-        <NalikaLogo size={30} />
+        <NalikaLogo size={36} />
         <p className="mb-6 mt-2 text-sm text-ink/50">Backoffice · acceso exclusivo del equipo.</p>
 
         <label className="mb-1 block text-xs font-semibold text-ink/60">Email</label>

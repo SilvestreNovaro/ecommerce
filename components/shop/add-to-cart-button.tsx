@@ -29,7 +29,7 @@ export function AddToCartButton({ product }: { product: Product }) {
       <button
         onClick={handleAdd}
         disabled={product.stock === 0}
-        className="w-full rounded-md bg-black py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 md:w-auto md:px-8"
+        className="w-full rounded-full bg-brand py-3 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-50 md:w-auto md:px-8"
       >
         {message || (product.stock === 0 ? "Agotado" : "Agregar al carrito")}
       </button>

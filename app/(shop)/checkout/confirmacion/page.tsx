@@ -80,7 +80,7 @@ export default async function ConfirmacionPage({ searchParams }: Props) {
         </Link>
         <Link
           href="/productos"
-          className="rounded-md bg-black px-6 py-2 text-center text-sm font-medium text-white hover:bg-gray-800"
+          className="rounded-md bg-brand px-6 py-2 text-center text-sm font-medium text-white hover:bg-brand-dark"
         >
           Seguir comprando
         </Link>

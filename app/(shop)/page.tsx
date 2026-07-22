@@ -55,7 +55,7 @@ export default async function HomePage() {
               <Link
                 key={cat.id}
                 href={`/productos?category=${cat.slug}`}
-                className="rounded-full border px-5 py-2 text-sm font-medium hover:bg-black hover:text-white transition-colors"
+                className="rounded-full border px-5 py-2 text-sm font-medium hover:bg-brand hover:text-white transition-colors"
               >
                 {cat.name}
               </Link>
