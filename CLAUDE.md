@@ -93,6 +93,20 @@ crema `#faf6f0` (`cream`) + arena `#e9e4de` (`sand`) + verde ahorro `#16a34a` (s
   `banners` quedaron con `titulo` vacío (el overlay ya no duplica; se mantiene el CTA). Archivos
   viejos borrados del bucket. Script: `gen-banners-v2.ps1` (misma carpeta de assets).
 
+**2026-07-22 — Correcciones de branding/UX (feedback de Joaco; entraron en el commit `428a920`):**
+- **FIX CRÍTICO**: `next.config.ts` permitía imágenes solo del proyecto Supabase VIEJO
+  (`cezqge...`) → `next/image` rompía todas las fotos. Ahora apunta a `giutlxlkaotbplnogtlo`.
+- **Nav ensamblado en una sola pieza** (chau "triple nav"): fila 1 logo 44px + buscador centrado +
+  cuenta/carrito; fila 2 blanca con borde sutil: "Todos los productos" + categorías + Galería.
+  `--nav-h`: 77px mobile / 121px desktop.
+- **Assets v3 con el SVG vectorial REAL del logo** (los v1/v2 dibujaban la patita con
+  círculos/triángulos que se notaban): pipeline HTML + Baloo 2 de Google Fonts → **Chrome headless
+  screenshot** (`C:\Users\joaqu\ecommerce-assets\gen-assets-v3.ps1`). Regenerados: 3 banners
+  (desktop+mobile, paths `v3-*` en el bucket, filas actualizadas, v2 borrados) y las 12 fotos de
+  producto (`product-images/seed2/`, `image_url` + `product_images` actualizados, `seed/` borrado).
+- Logo agrandado de verdad: navbar 44 · footer 42 · sidebar admin 38 · login admin 42.
+- **Botón flotante de WhatsApp** (`components/shop/whatsapp-button.tsx`) en todo el sitio público.
+
 ### Avance del rediseño
 
 **2026-07-22 — Infra admin + Módulo 1 (Pedidos) COMPLETOS:**
