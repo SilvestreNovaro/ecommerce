@@ -88,6 +88,37 @@ export async function sendWelcomeEmail(to: string, name: string): Promise<void> 
   }
 }
 
+// Link de reset de contraseña para usuarios del BACKOFFICE (módulo Usuarios).
+// A diferencia de los transaccionales de tienda, acá el que llama necesita saber
+// si el envío falló (el admin espera confirmación) → devuelve ok/error.
+export async function sendAdminPasswordResetEmail(
+  to: string,
+  actionLink: string
+): Promise<{ ok: boolean; error?: string }> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return { ok: false, error: "RESEND_API_KEY no configurada" };
+
+  try {
+    const resend = new Resend(key);
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to,
+      subject: "Nalika · Restablecé tu contraseña del panel",
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#16171d">
+          <h2 style="color:#E07A5F">🐾 Nalika Backoffice</h2>
+          <p>Restablecé tu contraseña del panel:</p>
+          <p><a href="${actionLink}" style="display:inline-block;background:#E07A5F;color:#fff;padding:10px 20px;border-radius:999px;text-decoration:none;font-weight:bold">Restablecer contraseña</a></p>
+          <p style="color:#888;font-size:12px;margin-top:24px">Si no lo pediste, ignorá este email.</p>
+        </div>`,
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error desconocido" };
+  }
+}
+
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }

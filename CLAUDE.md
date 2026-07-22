@@ -49,9 +49,9 @@ Proyecto conjunto de **Silvestre** (dueño del repo) y **Joaco** (colaborador, u
 | 5 | **Banners** | Admin de banners por sección del sitio + bucket `banners` + carrusel hero full-viewport en la home. Specs SUK: desktop **1920×1080**, mobile **1080×1920**. Banners genéricos de mascotas hasta tener reales. | ✅ 2026-07-22 |
 | 6 | **Galería Mascotas** | = "Suk Comunidad" renombrado: fotos de clientes/mascotas, admin para subir/ordenar/activar/eliminar, sección en home + página propia. | ✅ 2026-07-22 |
 | 7 | **Exportar CSV** | `/admin/exportar` + endpoint de export como SUK (con protección CSV injection). | ✅ 2026-07-22 |
-| 8 | **Consultas SQL** | Consola solo-SELECT del admin: RPC `execute_readonly_query` (solo `service_role`, revocada a anon/authenticated), queries guardadas, auditoría. | ⬜ |
-| 9 | **Usuarios** | Roles `admin`/`operador`, tabla `admin_users` (RLS deny-all, acceso solo por service role) + permisos por sección + `audit_logs` + reset de contraseña. | ⬜ |
-| 10 | **UI/UX admin** | Sidebar lateral filtrado por permisos, "Ver sitio", rol visible, **cerrar sesión**, patrones de filtros/búsqueda/paginación de SUK. | ⬜ |
+| 8 | **Consultas SQL** | Consola solo-SELECT del admin: RPC `execute_readonly_query` (solo `service_role`, revocada a anon/authenticated), queries guardadas, auditoría. | ✅ 2026-07-22 |
+| 9 | **Usuarios** | Roles `admin`/`operador`, tabla `admin_users` (RLS deny-all, acceso solo por service role) + permisos por sección + `audit_logs` + reset de contraseña. | ✅ 2026-07-22 |
+| 10 | **UI/UX admin** | Sidebar lateral filtrado por permisos, "Ver sitio", rol visible, **cerrar sesión**, patrones de filtros/búsqueda/paginación de SUK. | ✅ 2026-07-22 — quedó cubierto por el resto de los módulos: sidebar filtrado por permisos + "Ver sitio" + rol + Cerrar sesión están desde la infra admin (módulo 1), y los filtros/búsquedas de SUK ya se replicaron en cada módulo (Pedidos, Catálogo, Clientes, etc.). |
 
 **Front de tienda**: se rediseña en paralelo a medida que entran los módulos (home con hero carrusel de
 banners + destacados + galería mascotas, catálogo, detalle, carrito, checkout con doble precio).
@@ -280,6 +280,51 @@ crema `#faf6f0` (`cream`) + arena `#e9e4de` (`sand`) + verde ahorro `#16a34a` (s
   precio unitario, subtotal ítem, total pedido — **sin Talle**, Nalika no tiene talles); export
   **Clientes** = nombre, email, teléfono, pedidos, total gastado (sin cancelados), alta, último
   pedido (excluye `admin_users`).
+
+**2026-07-22 — Módulos 8 (Consultas SQL) y 9 (Usuarios) COMPLETOS — PLAN DE 10 MÓDULOS TERMINADO:**
+- **Migración** `20260722160000_sql_console` (aplicada): tabla `saved_queries` (RLS deny-all, solo
+  service role) + RPC `execute_readonly_query` que **NACE con el hardening del pentest de SUK**
+  (0006+0007 fusionadas): SECURITY DEFINER con `search_path = pg_catalog, public`,
+  `statement_timeout 5s`, solo SELECT/WITH por regex + blacklist en la función, `LIMIT 5000`
+  forzado (subselect + jsonb_agg) y **REVOKE ALL a public/anon/authenticated + GRANT EXECUTE solo
+  a service_role** (en SUK la RPC quedó ejecutable por la anon key → data breach; acá el agujero
+  no existió nunca). **Verificado contra la DB real**: anon → `42501 permission denied`, service
+  role → 200; `saved_queries` vía anon no devuelve filas. `types/supabase.ts` regenerado.
+- **Módulo 8 — `/admin/consultas`** (`components/admin/sql-console.tsx`, patrón ConsultasClient de
+  SUK): editor textarea con **Ctrl+Enter ejecuta**, aviso "Solo lectura · máx 5000 filas · timeout
+  5s", tabla de resultados scrolleable (sticky header, objetos como JSON), sidebar de consultas
+  guardadas (usar/editar/eliminar con confirmación en dos pasos) y **export CSV client-side** con
+  el mismo `csvCell` anti formula-injection del export (prefijo `'` a `=+-@`/tab/CR + BOM UTF-8).
+  APIs: `/api/admin/queries` (GET lista con `verifyAdminWithPermission`, POST crear/editar y
+  DELETE con `verifyAdminCanWrite`, auditadas) y `/api/admin/queries/execute` (POST admin-only —
+  "consultas" es ADMIN_ONLY): **normaliza el SQL quitando comentarios `/* */` y `--`** antes de
+  chequear, blacklist ampliada (DROP/DELETE/TRUNCATE/ALTER/CREATE/INSERT/UPDATE/GRANT/REVOKE/
+  EXECUTE/CALL/SET/COPY + PG_SLEEP/DBLINK/LO_IMPORT/LO_EXPORT/PG_READ_FILE/PG_WRITE_FILE), exige
+  SELECT/WITH inicial, saca el `;` final (la RPC envuelve en subselect), llama la RPC con service
+  role y **audita con `await` tanto `sql_query_executed` como `sql_query_blocked`** (el `audit()`
+  de Nalika estampa la IP solo). Defensa en profundidad: capa app + capa RPC + GRANT.
+- **Módulo 9 — `/admin/usuarios`** (`components/admin/users-admin.tsx`, patrón UsuariosPage de
+  SUK): lista con avatar, badge de rol (Admin terracota / Operador azul), badge Inactivo y "Vos";
+  **crear usuario** (form email/nombre/pass ≥8/rol → `auth.admin.createUser` con
+  `email_confirm: true` + insert en `admin_users` con **ROLLBACK `deleteUser` si falla el
+  insert**); activar/desactivar; cambiar rol; **panel expandible de permisos por sección para
+  operadores** (checkbox por sección asignable + sub-checkbox ámbar "Solo lectura" → `"seccion"` /
+  `"seccion:readonly"`; las ADMIN_ONLY usuarios/consultas no aparecen — nuevo export
+  `ASSIGNABLE_SECTIONS` en `lib/permissions.ts`); **reset de contraseña** en modal con 2 modos:
+  "set directo" (`auth.admin.updateUserById`, pass ≥8) y "email" (link recovery vía
+  `generateLink` + envío con Resend — 503 si no hay `RESEND_API_KEY`, 502 si falla el envío;
+  helper nuevo `sendAdminPasswordResetEmail` en `lib/resend/emails.ts` que SÍ reporta error, a
+  diferencia de los transaccionales fail-open). API `/api/admin/users` (GET/POST/PATCH) +
+  `/api/admin/users/[id]/reset-password`, todo con `verifyAdminCanWrite("usuarios")` + `audit()`.
+  **Anti auto-sabotaje server-side** (y espejado en la UI con botones deshabilitados): no podés
+  desactivarte, ni cambiarte el rol, ni tocarte los permisos; PATCH valida roles válidos y que
+  cada permiso sea de `ASSIGNABLE_SECTIONS` (con o sin `:readonly`).
+- **Módulo 10 (UI/UX admin)**: sin trabajo nuevo — verificado que ya estaba cubierto por los
+  módulos anteriores (sidebar filtrado por permisos, "Ver sitio", email+rol+Cerrar sesión en el
+  layout; filtros y búsquedas replicados en Pedidos/Catálogo/Clientes/etc.). Se marca ✅.
+- **Con esto el PLAN DE 10 MÓDULOS queda TERMINADO.** Pendientes que siguen abiertos: valores
+  reales de `BANK_*`/`NEXT_PUBLIC_WHATSAPP`/`RESEND_FROM`, Mercado Pago, dominio propio, y probar
+  checkout e2e con datos reales.
 
 ## Convenciones (heredadas de SUK/B2B)
 

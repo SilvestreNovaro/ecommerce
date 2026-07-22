@@ -21,6 +21,11 @@ export const ADMIN_ONLY_SECTIONS: SectionKey[] = ["usuarios", "consultas"];
 // Permisos por defecto de un operador sin `permissions` explícitos.
 export const DEFAULT_OPERATOR_SECTIONS: SectionKey[] = ["pedidos", "catalogo", "clientes"];
 
+// Secciones asignables a operadores (excluye las admin-only).
+export const ASSIGNABLE_SECTIONS = SECTIONS.filter(
+  (s) => !ADMIN_ONLY_SECTIONS.includes(s.key)
+);
+
 export type AdminUser = {
   id: string;
   email: string;

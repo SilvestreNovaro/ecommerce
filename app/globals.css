@@ -25,11 +25,11 @@
    home: h-[calc(100svh-var(--nav-h))]. En desktop suma la barra de
    categorías (44px + borde). */
 :root {
-  --nav-h: 73px;
+  --nav-h: 77px;
 }
 @media (min-width: 768px) {
   :root {
-    --nav-h: 118px;
+    --nav-h: 121px;
   }
 }
 

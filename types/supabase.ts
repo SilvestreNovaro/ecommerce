@@ -614,6 +614,36 @@ export type Database = {
           },
         ]
       }
+      saved_queries: {
+        Row: {
+          created_at: string
+          descripcion: string | null
+          id: string
+          nombre: string
+          orden: number
+          sql_query: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          orden?: number
+          sql_query: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          orden?: number
+          sql_query?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stock_movements: {
         Row: {
           created_at: string
@@ -684,6 +714,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      execute_readonly_query: { Args: { query_text: string }; Returns: Json }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {

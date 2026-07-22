@@ -20,7 +20,7 @@ export default async function AdminLayout({
         {/* Sidebar */}
         <aside className="flex flex-col gap-4 border-b border-black/5 bg-white p-4 md:min-h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
           <div className="flex flex-col gap-0.5">
-            <NalikaLogo size={32} />
+            <NalikaLogo size={38} />
             <p className="text-[10px] uppercase tracking-wide text-ink/40">Backoffice</p>
           </div>
 
