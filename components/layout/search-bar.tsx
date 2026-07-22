@@ -18,19 +18,19 @@ export function SearchBar() {
 
   return (
     <>
-      {/* Desktop: inline search */}
-      <form onSubmit={handleSubmit} className="hidden md:flex items-center">
+      {/* Desktop: buscador ancho estilo marketplace, ocupa el centro del header */}
+      <form onSubmit={handleSubmit} className="hidden w-full max-w-xl md:block">
         <div className="relative">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar..."
-            className="w-44 rounded-full border bg-gray-50 px-4 py-1.5 text-sm focus:w-56 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
+            placeholder="¿Qué busca tu mascota?"
+            className="h-11 w-full rounded-full border border-sand bg-cream pl-5 pr-12 text-sm text-ink placeholder:text-ink/40 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
           />
           <button
             type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black"
+            className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-white transition-colors hover:bg-brand-dark"
             aria-label="Buscar"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -40,7 +40,7 @@ export function SearchBar() {
         </div>
       </form>
 
-      {/* Mobile: toggle icon + expandable input */}
+      {/* Mobile: lupa que expande el input */}
       <div className="md:hidden">
         {open ? (
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
@@ -48,14 +48,17 @@ export function SearchBar() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar..."
+              placeholder="Buscar…"
               autoFocus
-              className="w-32 rounded-full border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-36 rounded-full border border-sand bg-cream px-3 py-1.5 text-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30"
             />
             <button
               type="button"
-              onClick={() => { setOpen(false); setQuery(""); }}
-              className="text-gray-400 hover:text-black"
+              onClick={() => {
+                setOpen(false);
+                setQuery("");
+              }}
+              className="text-ink/40 hover:text-ink"
               aria-label="Cerrar búsqueda"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -66,7 +69,7 @@ export function SearchBar() {
         ) : (
           <button
             onClick={() => setOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-gray-100"
+            className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-black/5"
             aria-label="Buscar"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
