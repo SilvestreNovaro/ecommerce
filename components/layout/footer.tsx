@@ -7,8 +7,9 @@ export function Footer() {
   return (
     <footer className="bg-ink py-12 text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-4">
-          <div>
+        {/* Mobile: logo y contacto a lo ancho, links en 2 columnas. Desktop: 4 columnas. */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
+          <div className="col-span-2 sm:col-span-1">
             <NalikaLogo size={42} light />
             <p className="mt-3 text-sm text-white/50">
               Todo para tu mascota, con amor 🐾
@@ -54,7 +55,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
-          <div>
+          <div className="col-span-2 sm:col-span-1">
             <h3 className="text-sm font-semibold text-white/90">Contacto</h3>
             <p className="mt-3 text-sm text-white/50">
               ¿Dudas con tu pedido o con un producto?
