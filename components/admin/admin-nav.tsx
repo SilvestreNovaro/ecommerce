@@ -20,7 +20,7 @@ export default function AdminNav() {
           <Link
             key={s.key}
             href={href}
-            className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-[15px] font-medium transition-colors ${
               active ? "bg-ink text-white" : "text-ink/60 hover:bg-black/5 hover:text-ink"
             }`}
           >

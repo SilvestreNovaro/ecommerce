@@ -17,30 +17,31 @@ export default async function AdminLayout({
   return (
     <AdminProvider user={user}>
       <div className="min-h-screen bg-cloud md:flex">
-        {/* Sidebar */}
-        <aside className="flex flex-col gap-4 border-b border-black/5 bg-white p-4 md:min-h-screen md:w-60 md:shrink-0 md:border-b-0 md:border-r">
-          <div className="flex flex-col gap-0.5">
-            <NalikaLogo size={38} />
-            <p className="text-[10px] uppercase tracking-wide text-ink/40">Backoffice</p>
+        {/* Sidebar: sticky a la altura del viewport para que el bloque de
+            usuario/cerrar sesión NO se vaya al fondo en páginas largas. */}
+        <aside className="flex flex-col gap-4 border-b border-black/5 bg-white p-4 md:sticky md:top-0 md:h-screen md:w-64 md:shrink-0 md:overflow-y-auto md:border-b-0 md:border-r">
+          <div className="flex flex-col gap-1">
+            <NalikaLogo size={42} />
+            <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Backoffice</p>
           </div>
 
           <Link
             href="/"
             target="_blank"
-            className="rounded-full border border-black/10 px-3 py-1.5 text-center text-xs font-medium text-ink/60 hover:bg-black/5"
+            className="rounded-full border border-black/10 px-3 py-2 text-center text-sm font-medium text-ink/60 hover:bg-black/5"
           >
             ↗ Ver sitio
           </Link>
 
           <AdminNav />
 
-          <div className="mt-auto border-t border-black/5 pt-3 text-xs">
+          <div className="mt-auto border-t border-black/5 pt-3 text-sm">
             <p className="truncate font-medium text-ink">{user.email}</p>
             <p className="mb-2 capitalize text-ink/40">{user.role}</p>
             <form action={signOutAdmin}>
               <button
                 type="submit"
-                className="w-full rounded-full border border-black/10 px-3 py-1.5 font-medium text-ink/60 hover:bg-black/5"
+                className="w-full rounded-full border border-black/10 px-3 py-2 font-medium text-ink/60 hover:bg-black/5"
               >
                 Cerrar sesión
               </button>
