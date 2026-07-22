@@ -1,15 +1,26 @@
 import Link from "next/link";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
+import type { ProductPrices } from "@/lib/pricing";
 import type { Product } from "@/types";
 
-export function ProductCard({ product }: { product: Product }) {
+// Card de producto con el modelo de precios SUK: doble precio SOLO si hay
+// ahorro real (nada tachado ni verde si no hay descuento). Los precios vienen
+// calculados server-side (computePrices) desde la página que la renderiza.
+export function ProductCard({ product, prices }: { product: Product; prices?: ProductPrices }) {
+  const hasPromo = prices?.hasPromo ?? false;
+  const current = prices?.current ?? product.price;
   return (
     <Link
       href={`/productos/${product.slug}`}
       className="group block overflow-hidden rounded-lg border bg-white transition-shadow hover:shadow-md"
     >
       <div className="relative aspect-square bg-gray-100">
+        {hasPromo && (
+          <span className="absolute right-2 top-2 z-10 rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+            Oferta
+          </span>
+        )}
         {product.image_url ? (
           <Image
             src={product.image_url}
@@ -26,7 +37,23 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="p-4">
         <h3 className="font-medium truncate">{product.name}</h3>
-        <p className="mt-1 text-lg font-bold">{formatPrice(product.price)}</p>
+        <div className="mt-1">
+          {hasPromo ? (
+            <p className="flex items-baseline gap-2">
+              <span className="text-sm text-gray-400 line-through">
+                {formatPrice(prices!.normal)}
+              </span>
+              <span className="text-lg font-bold">{formatPrice(current)}</span>
+            </p>
+          ) : (
+            <p className="text-lg font-bold">{formatPrice(current)}</p>
+          )}
+          {prices?.hasTransferDiscount && (
+            <p className="text-sm font-semibold text-save">
+              Con transferencia: {formatPrice(prices.transfer!)}
+            </p>
+          )}
+        </div>
         {product.stock === 0 && (
           <p className="mt-1 text-sm text-red-500">Agotado</p>
         )}

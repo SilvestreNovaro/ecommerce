@@ -106,9 +106,29 @@ export default async function AdminPedidoDetail({ params }: { params: Promise<{ 
               </div>
             );
           })}
-          <div className="flex justify-between rounded-2xl border border-black/5 bg-white px-4 py-3 font-semibold text-ink">
-            <span>Total</span>
-            <span>{money(order.total)}</span>
+          <div className="rounded-2xl border border-black/5 bg-white px-4 py-3">
+            {Number(order.promo_discount) > 0 && (
+              <div className="flex justify-between text-sm text-save">
+                <span>Descuento promociones</span>
+                <span>-{money(order.promo_discount)}</span>
+              </div>
+            )}
+            {Number(order.transfer_discount) > 0 && (
+              <>
+                <div className="flex justify-between text-sm text-ink/60">
+                  <span>Subtotal</span>
+                  <span>{money(order.subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-save">
+                  <span>Descuento por transferencia</span>
+                  <span>-{money(order.transfer_discount)}</span>
+                </div>
+              </>
+            )}
+            <div className="flex justify-between font-semibold text-ink">
+              <span>Total</span>
+              <span>{money(order.total)}</span>
+            </div>
           </div>
         </div>
 

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductFilters } from "@/components/shop/product-filters";
+import { computePrices } from "@/lib/pricing";
+import { getStoreSettings } from "@/lib/settings";
 import type { Product, Category } from "@/types";
 
 export const metadata: Metadata = {
@@ -53,10 +55,11 @@ export default async function ProductosPage({ searchParams }: Props) {
   } else if (sort === "name") {
     query = query.order("name", { ascending: true });
   } else {
-    query = query.order("created_at", { ascending: false });
+    // Orden manual del admin (sort_order) como default.
+    query = query.order("sort_order", { ascending: true }).order("created_at", { ascending: false });
   }
 
-  const { data: products } = await query;
+  const [{ data: products }, settings] = await Promise.all([query, getStoreSettings()]);
   const items = (products ?? []) as Product[];
 
   return (
@@ -80,7 +83,11 @@ export default async function ProductosPage({ searchParams }: Props) {
       ) : (
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              prices={computePrices(product, settings.transferPct, settings.transferEnabled)}
+            />
           ))}
         </div>
       )}

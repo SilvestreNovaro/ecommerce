@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { quoteCart } from "@/lib/quote";
 import { sendOrderConfirmation } from "@/lib/resend/emails";
 
 type CartItem = {
@@ -55,39 +56,45 @@ export async function createOrder(input: CheckoutInput): Promise<CheckoutResult>
     return { success: false, error: "Ingresá la dirección de envío." };
   }
 
-  // Precios y stock SIEMPRE desde la DB (nunca del cliente).
+  // Precios, promos y descuento por transferencia SIEMPRE server-side, con el
+  // MISMO cálculo que ve el cliente en carrito/checkout (lib/quote.ts):
+  //   unit_price snapshot = precio final unitario (oferta + mejor promo,
+  //   prorrateada por línea y redondeada a pesos enteros);
+  //   total = subtotal (post-promos) - descuento por transferencia.
   const admin = createAdminClient();
-  const productIds = items.map((i) => i.productId);
-  const { data: products, error: productsError } = await admin
-    .from("products")
-    .select("id, name, price, stock, active")
-    .in("id", productIds);
-  if (productsError || !products) {
-    return { success: false, error: "Error al verificar productos." };
-  }
-  const productMap = new Map(products.map((p) => [p.id, p]));
+  const quote = await quoteCart(
+    items.map((i) => ({ productId: i.productId, quantity: i.quantity }))
+  );
 
-  const validated: { productId: string; name: string; quantity: number; unitPrice: number }[] = [];
+  const validated: { productId: string; name: string; quantity: number; unitPrice: number; lineTotal: number }[] = [];
   for (const item of items) {
-    const product = productMap.get(item.productId);
-    if (!product) return { success: false, error: "Producto no encontrado." };
-    if (!product.active) return { success: false, error: `"${product.name}" ya no está disponible.` };
+    const line = quote.lines.find((l) => l.productId === item.productId);
+    if (!line) return { success: false, error: "Producto no encontrado." };
+    if (line.unavailable) return { success: false, error: `"${line.name}" ya no está disponible.` };
     const qty = Math.floor(item.quantity);
-    if (qty <= 0 || qty > MAX_QTY) return { success: false, error: `Cantidad inválida para "${product.name}".` };
-    if (product.stock < qty) {
+    if (qty <= 0 || qty > MAX_QTY || qty !== line.qty) {
+      return { success: false, error: `Cantidad inválida para "${line.name}".` };
+    }
+    if (line.stock < qty) {
       return {
         success: false,
         error:
-          product.stock === 0
-            ? `"${product.name}" está agotado.`
-            : `"${product.name}" solo tiene ${product.stock} unidades disponibles.`,
+          line.stock === 0
+            ? `"${line.name}" está agotado.`
+            : `"${line.name}" solo tiene ${line.stock} unidades disponibles.`,
       };
     }
-    validated.push({ productId: product.id, name: product.name, quantity: qty, unitPrice: product.price });
+    validated.push({
+      productId: line.productId,
+      name: line.name,
+      quantity: qty,
+      unitPrice: line.unitFinal,
+      lineTotal: line.lineTotal,
+    });
   }
 
-  const subtotal = validated.reduce((sum, it) => sum + it.unitPrice * it.quantity, 0);
-  const total = subtotal; // shipping_cost 0 = a coordinar por WhatsApp
+  const subtotal = quote.subtotal; // post-promos, pre-transferencia
+  const total = quote.total; // subtotal - descuento por transferencia (shipping a coordinar)
 
   // Garantizar el profile antes de la FK (patrón SUK).
   await admin.from("profiles").upsert(
@@ -118,6 +125,8 @@ export async function createOrder(input: CheckoutInput): Promise<CheckoutResult>
       ship_notes: (input.shipNotes ?? "").trim().slice(0, 300) || null,
       subtotal,
       shipping_cost: 0,
+      promo_discount: quote.promoDiscount,
+      transfer_discount: quote.transferDiscount,
       total,
     })
     .select("id, order_number")
@@ -131,8 +140,8 @@ export async function createOrder(input: CheckoutInput): Promise<CheckoutResult>
     product_id: it.productId,
     product_name: it.name,
     quantity: it.quantity,
-    unit_price: it.unitPrice,
-    subtotal: it.unitPrice * it.quantity,
+    unit_price: it.unitPrice, // snapshot: precio final unitario (con promos)
+    subtotal: it.lineTotal,
   }));
   const { error: itemsError } = await admin.from("order_items").insert(orderItems);
   if (itemsError) {
@@ -141,9 +150,10 @@ export async function createOrder(input: CheckoutInput): Promise<CheckoutResult>
   }
 
   // Descontar stock + registrar movimientos (inventario heredado de Nalika v1).
+  const stockByProduct = new Map(quote.lines.map((l) => [l.productId, l.stock]));
   for (const it of validated) {
-    const product = productMap.get(it.productId)!;
-    const newStock = product.stock - it.quantity;
+    const prevStock = stockByProduct.get(it.productId) ?? 0;
+    const newStock = prevStock - it.quantity;
     await admin
       .from("products")
       .update({ stock: newStock, updated_at: new Date().toISOString() })
@@ -152,7 +162,7 @@ export async function createOrder(input: CheckoutInput): Promise<CheckoutResult>
       product_id: it.productId,
       type: "sale",
       quantity: -it.quantity,
-      previous_stock: product.stock,
+      previous_stock: prevStock,
       new_stock: newStock,
       reason: `Venta - Pedido #${order.order_number}`,
       created_by: user.id,

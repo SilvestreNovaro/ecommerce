@@ -3,11 +3,13 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
+import { useCartQuote } from "@/lib/use-cart-quote";
 import { formatPrice } from "@/lib/utils";
 import { createOrder } from "./actions";
 
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart();
+  const { quote } = useCartQuote(items);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -187,25 +189,54 @@ export default function CheckoutPage() {
             disabled={loading}
             className="w-full rounded-md bg-black py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
           >
-            {loading ? "Procesando..." : `Confirmar pedido — ${formatPrice(total)}`}
+            {loading ? "Procesando..." : `Confirmar pedido — ${formatPrice(quote?.total ?? total)}`}
           </button>
         </form>
 
         <div className="h-fit rounded-lg border p-6">
           <h2 className="text-lg font-bold">Resumen del pedido</h2>
           <div className="mt-4 space-y-3">
-            {items.map(({ product, quantity }) => (
-              <div key={product.id} className="flex justify-between text-sm">
-                <span>
-                  {product.name} x{quantity}
-                </span>
-                <span>{formatPrice(product.price * quantity)}</span>
-              </div>
-            ))}
+            {items.map(({ product, quantity }) => {
+              const line = quote?.lines.find((l) => l.productId === product.id);
+              return (
+                <div key={product.id} className="flex justify-between text-sm">
+                  <span>
+                    {product.name} x{quantity}
+                  </span>
+                  <span>
+                    {line?.hasDiscount && (
+                      <span className="mr-1.5 text-gray-400 line-through">
+                        {formatPrice(line.lineList)}
+                      </span>
+                    )}
+                    {formatPrice(line?.lineTotal ?? product.price * quantity)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
-          <div className="mt-4 flex justify-between border-t pt-4 font-bold">
-            <span>Total</span>
-            <span>{formatPrice(total)}</span>
+          <div className="mt-4 space-y-2 border-t pt-4 text-sm">
+            {quote && quote.promoDiscount > 0 && (
+              <div className="flex justify-between text-save">
+                <span>Descuento promociones</span>
+                <span>-{formatPrice(quote.promoDiscount)}</span>
+              </div>
+            )}
+            {quote && quote.transferDiscount > 0 && (
+              <div className="flex justify-between text-save">
+                <span>Descuento por transferencia ({quote.transferPct}%)</span>
+                <span>-{formatPrice(quote.transferDiscount)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold">
+              <span>Total</span>
+              <span>{formatPrice(quote?.total ?? total)}</span>
+            </div>
+            {quote && quote.saving > 0 && (
+              <p className="text-right font-semibold text-save">
+                Ahorrás {formatPrice(quote.saving)}
+              </p>
+            )}
           </div>
           <p className="mt-3 text-xs text-gray-400">
             El total final se calcula en el servidor con los precios actuales.

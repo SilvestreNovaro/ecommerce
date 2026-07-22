@@ -45,7 +45,7 @@ Proyecto conjunto de **Silvestre** (dueño del repo) y **Joaco** (colaborador, u
 | 1 | **Pedidos** | TODO el flujo actual de SUK: estado de **pago** separado del **logístico**, `order_number` legible, confirmar pago 1-click (pendiente→pagado + recibido→preparación), avanzar estado logístico, cancelar, retiro vs envío con estados propios, filtros por estado/pago, búsqueda por N°/cliente/ID, filtro por fechas. SIN previews/print-files. | ✅ 2026-07-22 |
 | 2 | **Catálogo** | Gestión de productos estilo SUK: edición inline de precios en la lista, ordenar arrastrando, duplicar, destacados a dedo (`featured`), galería de imágenes por producto (drag&drop + portada), búsqueda por ID/nombre/slug. | ✅ 2026-07-22 |
 | 3 | **Clientes** | Listado + detalle de clientes como SUK. | ✅ 2026-07-22 |
-| 4 | **Promociones** | Modelo de precios SUK: `base_price` (normal) + `promo_price` (opcional) + **% descuento por transferencia GLOBAL** (`store_settings`, toggle + % editable en admin). Cálculo único server-side (`lib/pricing.ts`). | ⬜ |
+| 4 | **Promociones** | Modelo de precios SUK: `base_price` (normal) + `promo_price` (opcional) + **% descuento por transferencia GLOBAL** (`store_settings`, toggle + % editable en admin). Cálculo único server-side (`lib/pricing.ts`). | ✅ 2026-07-22 |
 | 5 | **Banners** | Admin de banners por sección del sitio + bucket `banners` + carrusel hero full-viewport en la home. Specs SUK: desktop **1920×1080**, mobile **1080×1920**. Banners genéricos de mascotas hasta tener reales. | ⬜ |
 | 6 | **Galería Mascotas** | = "Suk Comunidad" renombrado: fotos de clientes/mascotas, admin para subir/ordenar/activar/eliminar, sección en home + página propia. | ⬜ |
 | 7 | **Exportar CSV** | `/admin/exportar` + endpoint de export como SUK (con protección CSV injection). | ✅ 2026-07-22 |
@@ -121,6 +121,47 @@ propio, identidad visual definitiva (logo/colores de Nalika).
   productos activos.** La tienda pública sigue andando (columnas nuevas son aditivas; `types/index.ts`
   Product actualizado con `featured/sort_order/promo_price`). ⚠️ El front de tienda todavía NO muestra
   promo_price ni ordena por sort_order — entra con el rediseño del front (módulo 4 Promociones).
+
+**2026-07-22 — Módulo 4 (Promociones + precios) COMPLETO:**
+- **Migración** `20260722130000_promotions` (aplicada): enums `promo_tipo`
+  (porcentaje/monto_fijo/nxm/cantidad_minima) y `promo_alcance` (**todo/producto/categoria** —
+  adaptación vs SUK, que no tiene categorías); tabla `promotions` con CHECKs de coherencia
+  tipo↔campos (nxm_paga < nxm_compra, etc.) y RLS select público / escritura solo service role;
+  tabla `store_settings` single-row (id=1) con `transfer_discount_pct` (0-90, default 10) +
+  `transfer_discount_enabled` (default **false**), seed incluido; y columnas
+  `orders.promo_discount` + `orders.transfer_discount` (integer) para el desglose de la orden.
+  ⚠️ Todos los montos son **integer en pesos** (Math.round en cada paso, sin decimales).
+- **Libs**: `lib/pricing.ts` (`computePrices` puro: normal/current/transfer + hasPromo +
+  hasTransferDiscount + promoPct), `lib/promotions.ts` (`getActivePromotions` con ventana de
+  fechas + `lineDiscount`: la MEJOR promo por línea, no acumulan, tope = total de línea; alcance
+  categoría matchea la categoría del producto **o su padre** → subcategorías heredan),
+  `lib/settings.ts` (`getStoreSettings`/`setTransferDiscount`) y `lib/quote.ts` (**`quoteCart`,
+  única fuente de verdad del carrito**: la usan `/api/cart/quote` Y `createOrder` — lo que se
+  muestra es lo que se cobra).
+- **Admin `/admin/promociones`** (patrón SUK): ítem FIJO no eliminable "Descuento por
+  transferencia" (toggle + % editable → `store_settings`, auditado) + CRUD de promociones
+  (modal con grid de 4 tipos, campos condicionales, alcance todo/producto/categoría con selects,
+  fechas opcionales, toggle activo, cards Activas vs Inactivas/Vencidas, eliminar con
+  confirmación en dos pasos). `requireWrite("promociones")` + `audit()` en todas las actions.
+  Componente `components/admin/promotions-admin.tsx`.
+- **Tienda con precios reales** (patrón "solo si hay ahorro real": nada tachado/verde sin
+  descuento): `product-card` + detalle `[slug]` muestran normal tachado + vigente + badge
+  OFERTA (-X%) + línea verde "Con transferencia: $X" (server components → `computePrices`).
+  Listado `/productos` y home ordenan por `sort_order` (home prioriza `featured`).
+- **`POST /api/cart/quote`**: recalcula el carrito server-side y devuelve desglose
+  `{lines, listSubtotal, subtotal, promoDiscount, transferPct, transferDiscount, totalTransfer,
+  total, saving, count}`. Hook cliente `lib/use-cart-quote.ts`; `/carrito` y el resumen del
+  checkout muestran unitario tachado, nombre de la promo aplicada, descuentos y "Ahorrás $X"
+  (fallback naive del contexto mientras carga).
+- **Checkout**: `createOrder` usa `quoteCart` → **decisión de guardado**: `order_items.unit_price`
+  = precio final unitario con promo prorrateada por línea (`round((unit*qty - desc)/qty)`) y
+  `subtotal` del ítem = ese unitario × qty; `orders.subtotal` = suma post-promos;
+  `orders.transfer_discount` = % sobre ese subtotal (el pago es transferencia);
+  `orders.total = subtotal - transfer_discount`; `orders.promo_discount` = ahorro promocional
+  vs lista (informativo). El detalle de pedido del admin muestra el desglose si hay descuentos.
+- **Fix moneda**: `formatPrice` estaba en CLP/es-CL (leftover) → ahora **ARS/es-AR** sin decimales.
+- Verificado contra la DB real: seed de `store_settings` OK, CHECKs de `promotions` rechazan
+  filas incoherentes, columnas nuevas de `orders` OK. `types/supabase.ts` regenerado.
 
 **2026-07-22 — Módulos 3 (Clientes) y 7 (Exportar CSV) COMPLETOS:**
 - **Clientes admin** (`/admin/clientes` + `[id]`, patrón SUK, solo lectura): listado desde `profiles`

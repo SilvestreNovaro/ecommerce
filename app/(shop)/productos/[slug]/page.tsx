@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils";
+import { computePrices } from "@/lib/pricing";
+import { getStoreSettings } from "@/lib/settings";
 import { AddToCartButton } from "@/components/shop/add-to-cart-button";
 import type { Product } from "@/types";
 
@@ -36,16 +38,15 @@ export default async function ProductoDetallePage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("products")
-    .select("*")
-    .eq("slug", slug)
-    .eq("active", true)
-    .single();
+  const [{ data }, settings] = await Promise.all([
+    supabase.from("products").select("*").eq("slug", slug).eq("active", true).single(),
+    getStoreSettings(),
+  ]);
 
   if (!data) notFound();
 
   const product = data as Product;
+  const prices = computePrices(product, settings.transferPct, settings.transferEnabled);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -68,10 +69,33 @@ export default async function ProductoDetallePage({ params }: Props) {
         </div>
 
         <div className="flex flex-col">
-          <h1 className="text-3xl font-bold">{product.name}</h1>
-          <p className="mt-4 text-3xl font-bold">
-            {formatPrice(product.price)}
-          </p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">{product.name}</h1>
+            {prices.hasPromo && (
+              <span className="rounded-full bg-brand px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                Oferta -{prices.promoPct}%
+              </span>
+            )}
+          </div>
+
+          {/* Doble precio SOLO si hay ahorro real (patrón SUK) */}
+          <div className="mt-4">
+            {prices.hasPromo ? (
+              <p className="flex items-baseline gap-3">
+                <span className="text-xl text-gray-400 line-through">
+                  {formatPrice(prices.normal)}
+                </span>
+                <span className="text-3xl font-bold">{formatPrice(prices.current)}</span>
+              </p>
+            ) : (
+              <p className="text-3xl font-bold">{formatPrice(prices.current)}</p>
+            )}
+            {prices.hasTransferDiscount && (
+              <p className="mt-1 text-lg font-semibold text-save">
+                Con transferencia: {formatPrice(prices.transfer!)}
+              </p>
+            )}
+          </div>
 
           {product.stock > 0 ? (
             <p className="mt-2 text-sm text-green-600">

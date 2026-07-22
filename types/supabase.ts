@@ -201,6 +201,7 @@ export type Database = {
           paid_at: string | null
           payment_method: string
           payment_status: string
+          promo_discount: number
           ship_address: string | null
           ship_city: string | null
           ship_notes: string | null
@@ -209,6 +210,7 @@ export type Database = {
           shipping_cost: number
           subtotal: number
           total: number
+          transfer_discount: number
           updated_at: string
           user_id: string
         }
@@ -227,6 +229,7 @@ export type Database = {
           paid_at?: string | null
           payment_method: string
           payment_status?: string
+          promo_discount?: number
           ship_address?: string | null
           ship_city?: string | null
           ship_notes?: string | null
@@ -235,6 +238,7 @@ export type Database = {
           shipping_cost?: number
           subtotal: number
           total: number
+          transfer_discount?: number
           updated_at?: string
           user_id: string
         }
@@ -253,6 +257,7 @@ export type Database = {
           paid_at?: string | null
           payment_method?: string
           payment_status?: string
+          promo_discount?: number
           ship_address?: string | null
           ship_city?: string | null
           ship_notes?: string | null
@@ -261,6 +266,7 @@ export type Database = {
           shipping_cost?: number
           subtotal?: number
           total?: number
+          transfer_discount?: number
           updated_at?: string
           user_id?: string
         }
@@ -455,6 +461,78 @@ export type Database = {
         }
         Relationships: []
       }
+      promotions: {
+        Row: {
+          activo: boolean
+          alcance: Database["public"]["Enums"]["promo_alcance"]
+          cantidad_minima: number | null
+          category_id: string | null
+          created_at: string
+          descripcion: string | null
+          descuento_monto: number | null
+          descuento_porcentaje: number | null
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          id: string
+          nombre: string
+          nxm_compra: number | null
+          nxm_paga: number | null
+          product_id: string | null
+          tipo: Database["public"]["Enums"]["promo_tipo"]
+        }
+        Insert: {
+          activo?: boolean
+          alcance?: Database["public"]["Enums"]["promo_alcance"]
+          cantidad_minima?: number | null
+          category_id?: string | null
+          created_at?: string
+          descripcion?: string | null
+          descuento_monto?: number | null
+          descuento_porcentaje?: number | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          nombre: string
+          nxm_compra?: number | null
+          nxm_paga?: number | null
+          product_id?: string | null
+          tipo: Database["public"]["Enums"]["promo_tipo"]
+        }
+        Update: {
+          activo?: boolean
+          alcance?: Database["public"]["Enums"]["promo_alcance"]
+          cantidad_minima?: number | null
+          category_id?: string | null
+          created_at?: string
+          descripcion?: string | null
+          descuento_monto?: number | null
+          descuento_porcentaje?: number | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          nombre?: string
+          nxm_compra?: number | null
+          nxm_paga?: number | null
+          product_id?: string | null
+          tipo?: Database["public"]["Enums"]["promo_tipo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_movements: {
         Row: {
           created_at: string
@@ -499,6 +577,27 @@ export type Database = {
           },
         ]
       }
+      store_settings: {
+        Row: {
+          id: number
+          transfer_discount_enabled: boolean
+          transfer_discount_pct: number
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          transfer_discount_enabled?: boolean
+          transfer_discount_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          transfer_discount_enabled?: boolean
+          transfer_discount_pct?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -508,6 +607,8 @@ export type Database = {
     }
     Enums: {
       admin_role: "admin" | "operador"
+      promo_alcance: "todo" | "producto" | "categoria"
+      promo_tipo: "porcentaje" | "monto_fijo" | "nxm" | "cantidad_minima"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -639,6 +740,8 @@ export const Constants = {
   public: {
     Enums: {
       admin_role: ["admin", "operador"],
+      promo_alcance: ["todo", "producto", "categoria"],
+      promo_tipo: ["porcentaje", "monto_fijo", "nxm", "cantidad_minima"],
     },
   },
 } as const
