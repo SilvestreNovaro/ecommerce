@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { CartProvider } from "@/lib/cart-context";
 import "./globals.css";
 
@@ -17,22 +15,24 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Tienda Online",
-    template: "%s | Tienda Online",
+    default: "Nalika — Tienda de mascotas",
+    template: "%s | Nalika",
   },
   description:
-    "Descubre los mejores productos al mejor precio en nuestra tienda online.",
+    "Todo para tu mascota: alimento, juguetes, accesorios e higiene, al mejor precio.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
   ),
   openGraph: {
-    title: "Tienda Online",
+    title: "Nalika — Tienda de mascotas",
     description:
-      "Descubre los mejores productos al mejor precio en nuestra tienda online.",
+      "Todo para tu mascota: alimento, juguetes, accesorios e higiene, al mejor precio.",
     type: "website",
   },
 };
 
+// Layout raíz SIN chrome: el sitio público tiene Header/Footer en (shop)/layout,
+// el backoffice tiene su propio chrome en admin/(protected)/layout (patrón SUK).
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -43,12 +43,8 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-gray-50">
-        <CartProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </CartProvider>
+      <body className="min-h-full bg-gray-50">
+        <CartProvider>{children}</CartProvider>
       </body>
     </html>
   );

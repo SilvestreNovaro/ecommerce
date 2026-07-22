@@ -325,6 +325,38 @@ export type Database = {
           },
         ]
       }
+      product_images: {
+        Row: {
+          created_at: string
+          id: string
+          orden: number
+          product_id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          orden?: number
+          product_id: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          orden?: number
+          product_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           active: boolean
@@ -332,13 +364,16 @@ export type Database = {
           cost_price: number
           created_at: string
           description: string
+          featured: boolean
           id: string
           image_url: string | null
           low_stock_threshold: number
           name: string
           price: number
+          promo_price: number | null
           sku: string | null
           slug: string
+          sort_order: number
           stock: number
           updated_at: string
         }
@@ -348,13 +383,16 @@ export type Database = {
           cost_price?: number
           created_at?: string
           description?: string
+          featured?: boolean
           id?: string
           image_url?: string | null
           low_stock_threshold?: number
           name: string
           price: number
+          promo_price?: number | null
           sku?: string | null
           slug: string
+          sort_order?: number
           stock?: number
           updated_at?: string
         }
@@ -364,13 +402,16 @@ export type Database = {
           cost_price?: number
           created_at?: string
           description?: string
+          featured?: boolean
           id?: string
           image_url?: string | null
           low_stock_threshold?: number
           name?: string
           price?: number
+          promo_price?: number | null
           sku?: string | null
           slug?: string
+          sort_order?: number
           stock?: number
           updated_at?: string
         }

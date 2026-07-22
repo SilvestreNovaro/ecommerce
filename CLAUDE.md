@@ -43,7 +43,7 @@ Proyecto conjunto de **Silvestre** (dueño del repo) y **Joaco** (colaborador, u
 | # | Módulo | Qué se replica de SUK | Estado |
 |---|--------|----------------------|--------|
 | 1 | **Pedidos** | TODO el flujo actual de SUK: estado de **pago** separado del **logístico**, `order_number` legible, confirmar pago 1-click (pendiente→pagado + recibido→preparación), avanzar estado logístico, cancelar, retiro vs envío con estados propios, filtros por estado/pago, búsqueda por N°/cliente/ID, filtro por fechas. SIN previews/print-files. | ✅ 2026-07-22 |
-| 2 | **Catálogo** | Gestión de productos estilo SUK: edición inline de precios en la lista, ordenar arrastrando, duplicar, destacados a dedo (`featured`), galería de imágenes por producto (drag&drop + portada), búsqueda por ID/nombre/slug. | ⬜ |
+| 2 | **Catálogo** | Gestión de productos estilo SUK: edición inline de precios en la lista, ordenar arrastrando, duplicar, destacados a dedo (`featured`), galería de imágenes por producto (drag&drop + portada), búsqueda por ID/nombre/slug. | ✅ 2026-07-22 |
 | 3 | **Clientes** | Listado + detalle de clientes como SUK. | ⬜ |
 | 4 | **Promociones** | Modelo de precios SUK: `base_price` (normal) + `promo_price` (opcional) + **% descuento por transferencia GLOBAL** (`store_settings`, toggle + % editable en admin). Cálculo único server-side (`lib/pricing.ts`). | ⬜ |
 | 5 | **Banners** | Admin de banners por sección del sitio + bucket `banners` + carrusel hero full-viewport en la home. Specs SUK: desktop **1920×1080**, mobile **1080×1920**. Banners genéricos de mascotas hasta tener reales. | ⬜ |
@@ -89,6 +89,30 @@ propio, identidad visual definitiva (logo/colores de Nalika).
 - **Envs nuevas**: `ADMIN_EMAILS` (cargada en Vercel+local). Pendientes de valores reales:
   `BANK_HOLDER/NAME/CBU/ALIAS/CUIT`, `NEXT_PUBLIC_WHATSAPP`, `RESEND_FROM` (hoy placeholders).
 - ⚠️ Checkout e2e SIN probar aún: la DB no tiene productos (falta módulo 2 Catálogo).
+
+**2026-07-22 — Módulo 2 (Catálogo) COMPLETO:**
+- **Migración** `20260722120000_catalog_v2` (aplicada): `products.featured` + `products.sort_order`
+  + `products.promo_price` (integer nullable, CHECK > 0; `price` queda como precio normal) y tabla
+  `product_images` (galería por producto, FK cascade, `orden`; RLS select público, escritura solo
+  service role).
+- **Catálogo admin** (`/admin/catalogo` + `[id]`, patrón SUK): listado con thumbnail (🐾 si no hay),
+  ID visible, categoría, doble precio (normal tachado + promo en verde), stock, badge Activo/Borrador
+  y ⭐ destacado; búsqueda tokenizada por ID/nombre/slug; **edición inline de precios** (✎, valida
+  promo < normal); **reordenar con ↑/↓** (persiste `sort_order`); **duplicar** (copia nace borrador
+  "(copia)"); "+ Producto" crea borrador y va al editor. Editor con slug auto desde el nombre (hasta
+  tocarlo a mano), categoría con subcategorías (`optgroup`), promo con hint, activo/destacado, y
+  **galería de imágenes** (`product-images-manager`): multi-upload al bucket `product-images`
+  (MIME png/jpg/webp, máx 8MB, sin sharp), reordenar drag o ↑/↓, eliminar (borra del bucket) y la
+  primera se sincroniza a `products.image_url` (portada). Server actions en `catalogo/actions.ts`,
+  todas con `requireWrite("catalogo")` + `audit()`. **Eliminar con ventas asociadas → desactiva**
+  (preserva historial); sin ventas → borra fila + galería del bucket. `confirm-delete-button`
+  (confirmación en dos pasos, sin dialog).
+- **Seed** `scripts/seed-catalog.mjs` (idempotente por slug, lee `.env.local`): 6 categorías
+  (Perros/Gatos/Alimento/Juguetes/Accesorios/Higiene) + 12 productos placeholder de pet-shop
+  (4 con promo, 4 featured, stock 5–50, sin imágenes). **Ejecutado: DB con 6 categorías y 12
+  productos activos.** La tienda pública sigue andando (columnas nuevas son aditivas; `types/index.ts`
+  Product actualizado con `featured/sort_order/promo_price`). ⚠️ El front de tienda todavía NO muestra
+  promo_price ni ordena por sort_order — entra con el rediseño del front (módulo 4 Promociones).
 
 ## Convenciones (heredadas de SUK/B2B)
 

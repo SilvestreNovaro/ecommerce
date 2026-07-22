@@ -11,6 +11,9 @@ export type Product = {
   sku: string | null;
   low_stock_threshold: number;
   active: boolean;
+  featured: boolean;
+  sort_order: number;
+  promo_price: number | null;
   created_at: string;
   updated_at: string;
 };
