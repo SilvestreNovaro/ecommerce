@@ -5,6 +5,21 @@ import type { PetPhoto } from "@/lib/pet-gallery";
 // Sección "Galería Mascotas" de la home (réplica de Suk Comunidad):
 // grilla 2×3 en desktop, carrusel con autoplay en mobile/tablet. Si no hay
 // fotos activas, no renderiza nada.
+// Foto con el nombre de la mascota visible encima (degradé abajo + nombre).
+export function PhotoCard({ src, alt }: { src: string; alt: string }) {
+  return (
+    <figure className="relative overflow-hidden rounded-2xl shadow-sm">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} loading="lazy" className="aspect-square w-full bg-sand object-cover" />
+      {alt && (
+        <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/25 to-transparent px-4 pb-3 pt-10">
+          <span className="font-display text-base font-bold text-white drop-shadow">{alt}</span>
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
 export default function PetGallery({ photos }: { photos: PetPhoto[] }) {
   if (photos.length === 0) return null;
   return (
@@ -22,14 +37,7 @@ export default function PetGallery({ photos }: { photos: PetPhoto[] }) {
           <CardCarousel
             ariaLabel="Galería Mascotas"
             items={photos.map((photo) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={photo.id}
-                src={photo.src}
-                alt={photo.alt}
-                loading="lazy"
-                className="aspect-square w-full rounded-2xl bg-sand object-cover shadow-sm"
-              />
+              <PhotoCard key={photo.id} src={photo.src} alt={photo.alt} />
             ))}
           />
         </div>
@@ -37,15 +45,7 @@ export default function PetGallery({ photos }: { photos: PetPhoto[] }) {
         {/* Desktop: grilla 2×3 */}
         <div className="hidden gap-6 md:grid md:grid-cols-3">
           {photos.map((photo) => (
-            <figure key={photo.id}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo.src}
-                alt={photo.alt}
-                loading="lazy"
-                className="aspect-square w-full rounded-2xl bg-sand object-cover shadow-sm"
-              />
-            </figure>
+            <PhotoCard key={photo.id} src={photo.src} alt={photo.alt} />
           ))}
         </div>
 

@@ -78,14 +78,49 @@ export async function updatePetPhoto(
   revalidateGallery();
 }
 
-export async function setPetPhotoOrden(id: string, orden: number): Promise<void> {
-  await requireWrite("galeria");
+// Reordena TODA la galería: recibe los ids en el orden final y asigna
+// orden = índice. (Robusto ante empates de `orden`, que rompían el mover ±1.)
+export async function reorderPetPhotos(ids: string[]): Promise<void> {
+  const user = await requireWrite("galeria");
+  if (!Array.isArray(ids) || ids.length === 0) return;
   const db = createAdminClient();
-  const { error } = await db
-    .from("pet_photos")
-    .update({ orden: Math.round(orden) })
-    .eq("id", id);
+  for (let i = 0; i < ids.length; i++) {
+    const { error } = await db.from("pet_photos").update({ orden: i }).eq("id", ids[i]);
+    if (error) throw new Error(error.message);
+  }
+  await audit(user, "pet_photos_reordered", { type: "pet_photo", details: { count: ids.length } });
+  revalidateGallery();
+}
+
+// Reemplaza la imagen de una foto existente (mantiene alt/orden/estado):
+// sube la nueva, actualiza la URL y borra el archivo anterior del bucket.
+export async function replacePetPhotoImage(formData: FormData): Promise<void> {
+  const user = await requireWrite("galeria");
+  const id = String(formData.get("id") || "");
+  const file = formData.get("file");
+  if (!id || !(file instanceof File)) throw new Error("Faltan datos");
+  if (!MIME[file.type]) throw new Error("Formato no permitido (PNG, JPG o WebP)");
+  if (file.size === 0 || file.size > MAX_BYTES) throw new Error("El archivo supera 8MB");
+
+  const db = createAdminClient();
+  const { data: p } = await db.from("pet_photos").select("image_url").eq("id", id).maybeSingle();
+  if (!p) throw new Error("Foto no encontrada");
+
+  const buf = Buffer.from(await file.arrayBuffer());
+  const path = `pet-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${MIME[file.type]}`;
+  const { error: upErr } = await db.storage
+    .from(BUCKET)
+    .upload(path, buf, { contentType: file.type, cacheControl: "3600", upsert: false });
+  if (upErr) throw new Error(upErr.message);
+  const url = db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+
+  const { error } = await db.from("pet_photos").update({ image_url: url }).eq("id", id);
   if (error) throw new Error(error.message);
+
+  const oldPath = pathFromUrl(p.image_url);
+  if (oldPath) await db.storage.from(BUCKET).remove([oldPath]);
+
+  await audit(user, "pet_photo_image_replaced", { type: "pet_photo", id });
   revalidateGallery();
 }
 

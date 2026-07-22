@@ -10,11 +10,14 @@ export default function ConfirmDeleteButton({
   id,
   label = "Eliminar",
   message = "Esta acción no se puede deshacer.",
+  compact = false,
 }: {
   action: (formData: FormData) => Promise<void>;
   id: string;
   label?: string;
   message?: string;
+  /** Para espacios chicos (cards de grilla): botones mini apilados, sin texto largo. */
+  compact?: boolean;
 }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
@@ -31,6 +34,40 @@ export default function ConfirmDeleteButton({
       setBusy(false);
       setConfirming(false);
     }
+  }
+
+  if (compact) {
+    if (confirming) {
+      return (
+        <div className="grid grid-cols-2 gap-1.5" title={message}>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={busy}
+            className="rounded-full bg-red-600 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            {busy ? "…" : "Sí, borrar"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            disabled={busy}
+            className="rounded-full border border-black/10 py-1.5 text-xs text-ink/50 hover:text-ink"
+          >
+            Cancelar
+          </button>
+        </div>
+      );
+    }
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        className="w-full rounded-full border border-red-200 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
+      >
+        {label}
+      </button>
+    );
   }
 
   if (confirming) {
