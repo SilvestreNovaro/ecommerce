@@ -44,11 +44,11 @@ Proyecto conjunto de **Silvestre** (dueño del repo) y **Joaco** (colaborador, u
 |---|--------|----------------------|--------|
 | 1 | **Pedidos** | TODO el flujo actual de SUK: estado de **pago** separado del **logístico**, `order_number` legible, confirmar pago 1-click (pendiente→pagado + recibido→preparación), avanzar estado logístico, cancelar, retiro vs envío con estados propios, filtros por estado/pago, búsqueda por N°/cliente/ID, filtro por fechas. SIN previews/print-files. | ✅ 2026-07-22 |
 | 2 | **Catálogo** | Gestión de productos estilo SUK: edición inline de precios en la lista, ordenar arrastrando, duplicar, destacados a dedo (`featured`), galería de imágenes por producto (drag&drop + portada), búsqueda por ID/nombre/slug. | ✅ 2026-07-22 |
-| 3 | **Clientes** | Listado + detalle de clientes como SUK. | ⬜ |
+| 3 | **Clientes** | Listado + detalle de clientes como SUK. | ✅ 2026-07-22 |
 | 4 | **Promociones** | Modelo de precios SUK: `base_price` (normal) + `promo_price` (opcional) + **% descuento por transferencia GLOBAL** (`store_settings`, toggle + % editable en admin). Cálculo único server-side (`lib/pricing.ts`). | ⬜ |
 | 5 | **Banners** | Admin de banners por sección del sitio + bucket `banners` + carrusel hero full-viewport en la home. Specs SUK: desktop **1920×1080**, mobile **1080×1920**. Banners genéricos de mascotas hasta tener reales. | ⬜ |
 | 6 | **Galería Mascotas** | = "Suk Comunidad" renombrado: fotos de clientes/mascotas, admin para subir/ordenar/activar/eliminar, sección en home + página propia. | ⬜ |
-| 7 | **Exportar CSV** | `/admin/exportar` + endpoint de export como SUK (con protección CSV injection). | ⬜ |
+| 7 | **Exportar CSV** | `/admin/exportar` + endpoint de export como SUK (con protección CSV injection). | ✅ 2026-07-22 |
 | 8 | **Consultas SQL** | Consola solo-SELECT del admin: RPC `execute_readonly_query` (solo `service_role`, revocada a anon/authenticated), queries guardadas, auditoría. | ⬜ |
 | 9 | **Usuarios** | Roles `admin`/`operador`, tabla `admin_users` (RLS deny-all, acceso solo por service role) + permisos por sección + `audit_logs` + reset de contraseña. | ⬜ |
 | 10 | **UI/UX admin** | Sidebar lateral filtrado por permisos, "Ver sitio", rol visible, **cerrar sesión**, patrones de filtros/búsqueda/paginación de SUK. | ⬜ |
@@ -121,6 +121,27 @@ propio, identidad visual definitiva (logo/colores de Nalika).
   productos activos.** La tienda pública sigue andando (columnas nuevas son aditivas; `types/index.ts`
   Product actualizado con `featured/sort_order/promo_price`). ⚠️ El front de tienda todavía NO muestra
   promo_price ni ordena por sort_order — entra con el rediseño del front (módulo 4 Promociones).
+
+**2026-07-22 — Módulos 3 (Clientes) y 7 (Exportar CSV) COMPLETOS:**
+- **Clientes admin** (`/admin/clientes` + `[id]`, patrón SUK, solo lectura): listado desde `profiles`
+  **excluyendo** los que están en `admin_users` (usuarios del panel no son clientes), con avatar de
+  inicial, nombre/email/teléfono, cantidad de pedidos, **total gastado sin cancelados**
+  (`logistic_status='cancelled'` no suma), alta y fecha del último pedido; búsqueda client-side
+  tokenizada por nombre/email/teléfono/ID + checkbox "Solo con pedidos" (límite 1000 perfiles).
+  Detalle: datos de contacto + stats (pedidos / total s/cancelados) + todos sus pedidos con badges
+  de pago y logística (mismos colores/labels que Pedidos, incl. "Retirado" para pickup entregado)
+  linkeando a `/admin/pedidos/<id>`. Componente `components/admin/clients-admin-list.tsx`.
+- **Exportar CSV** (`/admin/exportar` + `GET /api/admin/export`): página con selector de tipo (dos
+  cards Pedidos/Clientes) + rango de fechas (solo aplica a pedidos); el botón navega al endpoint →
+  descarga directa. Endpoint con `verifyAdminWithPermission("exportar")` (401 si no), query params
+  `type`/`from`/`to`, responde `text/csv` con `Content-Disposition: attachment` y nombre con fecha
+  (`pedidos_nalika_*.csv` / `clientes_nalika_*.csv`). Replicado de SUK: **`csvCell()` anti
+  CSV/formula injection** (prefijo `'` si la celda arranca con `=`/`+`/`-`/`@`/tab/CR, comillas
+  escapadas) + **BOM UTF-8** para Excel. Export **Pedidos** = una fila por ítem (N°, fecha, método
+  de pago, estado de pago, estado logístico, entrega, cliente, email, teléfono, producto, cantidad,
+  precio unitario, subtotal ítem, total pedido — **sin Talle**, Nalika no tiene talles); export
+  **Clientes** = nombre, email, teléfono, pedidos, total gastado (sin cancelados), alta, último
+  pedido (excluye `admin_users`).
 
 ## Convenciones (heredadas de SUK/B2B)
 
