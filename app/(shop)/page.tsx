@@ -5,12 +5,14 @@ import HeroCarousel from "@/components/shop/hero-carousel";
 import { computePrices } from "@/lib/pricing";
 import { getStoreSettings } from "@/lib/settings";
 import { getBannerSlides } from "@/lib/banners";
+import { getPetPhotos } from "@/lib/pet-gallery";
+import PetGallery from "@/components/shop/pet-gallery";
 import type { Product, Category } from "@/types";
 
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [{ data: products }, { data: categoriesData }, settings, heroSlides] = await Promise.all([
+  const [{ data: products }, { data: categoriesData }, settings, heroSlides, petPhotos] = await Promise.all([
     supabase
       .from("products")
       .select("*")
@@ -22,6 +24,7 @@ export default async function HomePage() {
     supabase.from("categories").select("*").order("name"),
     getStoreSettings(),
     getBannerSlides("home"),
+    getPetPhotos(6),
   ]);
 
   const categories = (categoriesData ?? []) as Category[];
@@ -85,6 +88,9 @@ export default async function HomePage() {
         )}
       </section>
       </div>
+
+      {/* Galería Mascotas (réplica de Suk Comunidad). Solo si hay fotos activas. */}
+      <PetGallery photos={petPhotos} />
     </>
   );
 }

@@ -47,7 +47,7 @@ Proyecto conjunto de **Silvestre** (dueño del repo) y **Joaco** (colaborador, u
 | 3 | **Clientes** | Listado + detalle de clientes como SUK. | ✅ 2026-07-22 |
 | 4 | **Promociones** | Modelo de precios SUK: `base_price` (normal) + `promo_price` (opcional) + **% descuento por transferencia GLOBAL** (`store_settings`, toggle + % editable en admin). Cálculo único server-side (`lib/pricing.ts`). | ✅ 2026-07-22 |
 | 5 | **Banners** | Admin de banners por sección del sitio + bucket `banners` + carrusel hero full-viewport en la home. Specs SUK: desktop **1920×1080**, mobile **1080×1920**. Banners genéricos de mascotas hasta tener reales. | ✅ 2026-07-22 |
-| 6 | **Galería Mascotas** | = "Suk Comunidad" renombrado: fotos de clientes/mascotas, admin para subir/ordenar/activar/eliminar, sección en home + página propia. | ⬜ |
+| 6 | **Galería Mascotas** | = "Suk Comunidad" renombrado: fotos de clientes/mascotas, admin para subir/ordenar/activar/eliminar, sección en home + página propia. | ✅ 2026-07-22 |
 | 7 | **Exportar CSV** | `/admin/exportar` + endpoint de export como SUK (con protección CSV injection). | ✅ 2026-07-22 |
 | 8 | **Consultas SQL** | Consola solo-SELECT del admin: RPC `execute_readonly_query` (solo `service_role`, revocada a anon/authenticated), queries guardadas, auditoría. | ⬜ |
 | 9 | **Usuarios** | Roles `admin`/`operador`, tabla `admin_users` (RLS deny-all, acceso solo por service role) + permisos por sección + `audit_logs` + reset de contraseña. | ⬜ |
@@ -212,6 +212,32 @@ crema `#faf6f0` (`cream`) + arena `#e9e4de` (`sand`) + verde ahorro `#16a34a` (s
   del hero repite ese texto encima (quedó coherente a propósito) — cuando haya banners
   fotográficos reales, dejar aire en el centro y el overlay hace de texto único; si molesta el
   doble texto mientras tanto, vaciar título/subtítulo desde el admin.
+
+**2026-07-22 — Módulo 6 (Galería Mascotas) COMPLETO:**
+- **Migración** `20260722150000_pet_gallery` (aplicada): tabla `pet_photos` (image_url/alt/orden/
+  active/created_at) con RLS **select público SOLO de active=true** y escritura solo service role +
+  **bucket Storage `pet-gallery` público** (policy de lectura). `types/supabase.ts` regenerado.
+- **Admin `/admin/galeria`** (patrón CommunityClient de SUK → `components/admin/pet-gallery-admin.tsx`
+  + `galeria/actions.ts`): grid de cards con **multi-upload** al bucket (input multiple, MIME
+  png/jpg/webp máx 8MB c/u, nacen activas al final del orden), editar `alt` (descripción/epígrafe,
+  guarda onBlur, máx 200), ↑/↓ orden, toggle Activa/Oculta y eliminar con `confirm-delete-button`
+  (borra también el archivo del bucket). Todas las actions con `requireWrite("galeria")` + `audit()`.
+- **Front**: `lib/pet-gallery.ts` (`getPetPhotos(limit?)`, activas por orden, anon client — la RLS
+  ya filtra), `components/shop/card-carousel.tsx` (**port del CardCarousel de SUK**: autoplay 3.5s
+  pausable, respeta prefers-reduced-motion, flechas + dots, 1 card <640px / 2 en tablet) y
+  `components/shop/pet-gallery.tsx` (sección home sobre fondo `cream`: título "Galería Mascotas 🐾"
+  + "Los que ya son parte de la familia Nalika", **grilla 2×3 desktop / carrusel mobile**, CTA
+  borde `brand` "Ver toda la galería" → `/galeria`; si no hay fotos activas no renderiza nada).
+  Home: la sección va al final, después de destacados (máx 6 fotos). Página `app/(shop)/galeria/`
+  con `SectionBanner` (sección `galeria`, ya declarada en `lib/banner-sections.ts`), grilla completa
+  con el `alt` como epígrafe (`figcaption`) y metadata "Galería Mascotas".
+- **Seed** `scripts/seed-pet-gallery.mjs` (idempotente por `alt`, service role, lee `.env.local`
+  tolerando BOM): como no hay fotos reales de clientes, genera **6 SVGs placeholder 800×800**
+  (fondo pastel terracota/arena de la paleta + isotipo huella-corazón en blanco + nombre) y los sube
+  como `image/svg+xml` al bucket + inserta las 6 filas activas (Luna 🐱, Toby 🐶, Michi, Rocco,
+  Frida, Simón). **Ejecutado y verificado**: anon lee las 6 filas vía RLS, la imagen responde 200
+  pública, y la home y `/galeria` sirven la sección con las 6 fotos (probado con `next start`).
+  Cuando lleguen fotos reales: subirlas desde el admin y eliminar/ocultar las placeholder.
 
 **2026-07-22 — Módulos 3 (Clientes) y 7 (Exportar CSV) COMPLETOS:**
 - **Clientes admin** (`/admin/clientes` + `[id]`, patrón SUK, solo lectura): listado desde `profiles`

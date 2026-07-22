@@ -385,6 +385,33 @@ export type Database = {
           },
         ]
       }
+      pet_photos: {
+        Row: {
+          active: boolean
+          alt: string | null
+          created_at: string
+          id: string
+          image_url: string
+          orden: number
+        }
+        Insert: {
+          active?: boolean
+          alt?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          orden?: number
+        }
+        Update: {
+          active?: boolean
+          alt?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          orden?: number
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           created_at: string
